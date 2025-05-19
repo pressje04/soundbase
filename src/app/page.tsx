@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'; 
 import Navbar from "../components/navbar.jsx";
-import AlbumScroll from "@/components/albumscroll.tsx";
+import AlbumScroll from "@/components/albumscroll";
 
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
