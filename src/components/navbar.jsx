@@ -28,9 +28,13 @@ export default function Navbar() {
                     <Link href="/trending" className="hover:text-blue-500 transition">Trending</Link>
                     <Link href="/sessions" className="hover:text-blue-500 transition">Sessions</Link>
                     <Link href="/reviews" className="hover:text-blue-500 transition">Reviews</Link>
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                        Sign In
-                    </button>
+                    <Link
+                        href="/signup"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                    >
+                    Sign Up
+                    </Link>
+
                 </div>
             </div>
         </nav>
