@@ -34,7 +34,6 @@ export default function Navbar() {
                     >
                     Sign Up
                     </Link>
-
                 </div>
             </div>
         </nav>

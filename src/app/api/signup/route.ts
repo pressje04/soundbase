@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
         //We require the user to provide either an email OR a phone number
         if (!identifier) {
             return NextResponse.json(
-                { error: 'Please enter a valid phone number or email address'},
+                { field: 'identifier', error: 'Please enter a valid phone number or email address'},
                 { status: 400 }
             );
         }
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         //User must provide a password and confirm it
         if (!password || !confirmPassword) {
             return NextResponse.json(
-                { error: 'You must provide a password and confirm it'},
+                { field: 'password', error: 'You must provide a password and confirm it'},
                 { status: 400 }
             );
         }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         //The two must match
         if (password !== confirmPassword) {
             return NextResponse.json(
-                { error: 'Passwords must match'},
+                { field: 'confirmPassword', error: 'Passwords must match'},
                 { status: 400 }
             );
         }
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         
         if (!isEmail && !isPhone) {
             return NextResponse.json(
-                {error: 'Invalid email or phone number format'},
+                {field: 'identifier', error: 'Invalid email or phone number format'},
                 {status: 400}
             );
         }
@@ -51,25 +51,16 @@ export async function POST(req: NextRequest) {
 
         /* --------------- Now that we have processed user input when they sign up, need to verify uniqueness. -------------------------*/
 
-        //Check if email is in use
-        if (email) {
-            const existingEmail = await prisma.user.findUnique({ where: { email }});
-            if (existingEmail) {
-                return NextResponse.json(
-                    { error: 'Email already in use'}, { status: 409 }
-                );
-            }
-        }
+        const existingUser = await prisma.user.findFirst({
+            where: isEmail ? {email: identifier} : {phone: identifier},
+        });
 
-        //same thing but if the user gave a phone number instead
-        if (phone) {
-            const existingPhone = await prisma.user.findUnique( { where: { phone }});
-            if (existingPhone) {
-                return NextResponse.json(
-                    { error: 'Phone number already in use'}, { status: 409}
-                );
-            }
+        if (existingUser) {
+            return NextResponse.json({error: 'User already exists with these credentials'},
+            {status:409}
+            );
         }
+        
 
         /* --------------- Now that we have verified all info is provided and valid, we can deal with JWT ----------------------------*/
 
@@ -79,8 +70,8 @@ export async function POST(req: NextRequest) {
 
         const user = await prisma.user.create({
             data: {
-                email,
-                phone,
+                email: isEmail ? identifier : undefined,
+                phone: isPhone ? identifier : undefined,
                 password: hashedPw,
             },
         });
