@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 //This API endpoint will handle a user requesting to signup for the app
 export async function POST(req: NextRequest) {
     try {
-        const { identifier, password, confirmPassword } = await req.json();
+        const { identifier, firstName, password, confirmPassword } = await req.json();
 
         //We require the user to provide either an email OR a phone number
         if (!identifier) {
@@ -19,6 +19,12 @@ export async function POST(req: NextRequest) {
                 { field: 'identifier', error: 'Please enter a valid phone number or email address'},
                 { status: 400 }
             );
+        }
+
+        //User should enter a valid first name
+        if (!firstName) {
+            return NextResponse.json({error: 'Please enter a valid first name'},
+            {status: 400});
         }
 
         //User must provide a password and confirm it
@@ -73,6 +79,7 @@ export async function POST(req: NextRequest) {
                 email: isEmail ? identifier : undefined,
                 phone: isPhone ? identifier : undefined,
                 password: hashedPw,
+                firstName,
             },
         });
 

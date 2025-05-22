@@ -5,46 +5,43 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function post(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { email, phone, password } = await req.json();
+    const { identifier, password } = await req.json();
 
-    if (!password || (!email && !phone)) {
+    if (!identifier || !password) {
       return NextResponse.json(
-        {error: 'Email/phone and password are required'},
-        {status: 400}
+        { field: 'identifier', error: 'Email/phone and password are required' },
+        { status: 400 }
       );
     }
 
-    //Try to find this user in db
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+    // Lookup user by either email or phone
     const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          email ? { email } : undefined,
-          phone ? { phone } : undefined,
-         ].filter(Boolean) as any,
-      }
+      where: isEmail ? { email: identifier } : { phone: identifier },
     });
 
     if (!user) {
       return NextResponse.json(
-        {error: 'No user found with those specified credentials. Sign up?'},
-        {status: 401}
+        { field: 'identifier', error: 'No user found with those credentials' },
+        { status: 401 }
       );
     }
 
-    const rightPassword = await bcrypt.compare(password, user.password);
-    if (!rightPassword) {
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
       return NextResponse.json(
-        {error: 'Invalid password'},
-        {status: 401}
+        { field: 'password', error: 'Invalid password' },
+        { status: 401 }
       );
     }
 
     const token = jwt.sign(
-      { userId: user.id},
+      { userId: user.id },
       process.env.JWT_SECRET!,
-      {expiresIn: '7d'}
+      { expiresIn: '7d' }
     );
 
     const response = NextResponse.json({ message: 'Login successful' });
@@ -60,8 +57,8 @@ export async function post(req: NextRequest) {
   } catch (error) {
     console.error('Login error: ', error);
     return NextResponse.json(
-      {error: 'Some problem occured during login'},
-      {status: 500}
+      { error: 'Something went wrong during login' },
+      { status: 500 }
     );
   }
 }

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn } from 'next-auth/react'; 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function SignupPage() {
   const [form, setForm] = useState({
     identifier: "",
+    firstName: "",
     password: "",
     confirmPassword: ""
   });
@@ -67,8 +69,8 @@ export default function SignupPage() {
       </div>
 
       {/* Signup form with border */}
-      <div className="w-full max-w-md p-6 border border-gray-500 rounded-lg bg-black bg-opacity-60">
-        <h1 className="text-2xl font-bold mb-4 text-white text-center">Sign Up For Soundbase</h1>
+      <div className="w-full max-w-md p-6 rounded-lg bg-black bg-opacity-60">
+        <h1 className="text-2xl font-bold mb-16 text-white text-center">Sign Up For Soundbase</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Identifier field */}
@@ -83,6 +85,27 @@ export default function SignupPage() {
               transition-all duration-350 ease-in-out
               focus:outline-none
               ${hasSubmitted && fieldErrors.identifier
+                ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
+                : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
+            `}
+            style={{
+              WebkitBoxShadow: '0 0 0px 1000px #000 inset',
+              WebkitTextFillColor: 'white',
+            }}
+          />
+
+          {/*First Name Field */}
+          <input
+            type="text"
+            name="firstName"
+            placeholder="First Name"
+            autoComplete="new-password"
+            value={form.firstName}
+            onChange={handleChange}
+            className={`w-full px-4 py-2 rounded bg-black text-white
+              transition-all duration-350 ease-in-out
+              focus:outline-none
+              ${hasSubmitted && fieldErrors.firstName
                 ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
                 : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
             `}
@@ -136,7 +159,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            className="w-full font-bold bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
           >
             Sign Up
           </button>
@@ -152,6 +175,28 @@ export default function SignupPage() {
             </div>
           )}
         </form>
+        <button
+            type="button"
+            onClick={() => signIn('google')}
+            className="w-full mt-4 p-0 bg-transparent border-none"
+        >
+        <img
+            src="/images/light/google_signup.png"
+            alt="Sign up with Google"
+            className="mt-4 max-h-10 w-auto mx-auto block"
+        />
+        <h3 className='mt-8 mb-8'>OR</h3>
+        </button>
+
+
+
+        <p className="mt-4 text-sm text-center text-white">
+            Already have an account?{' '}
+            <a href="/login"
+            className="text-blue-400 hover:text-blue-300 hover:underline transition"
+            >Log in here
+            </a>
+        </p>
       </div>
     </div>
   );
