@@ -115,7 +115,7 @@ export default function LoginPage() {
             className="w-full mt-4 p-0 bg-transparent border-none"
         >
         <img
-            src="/images/light/google_signup.png"
+            src="/images/light/google_login.png"
             alt="Sign up with Google"
             className="mt-4 max-h-10 w-auto mx-auto block"
         />
