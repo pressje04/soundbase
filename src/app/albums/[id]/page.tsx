@@ -1,0 +1,87 @@
+import Image from 'next/image';
+import Navbar from '@/components/navbar';
+
+export default async function AlbumPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  const tokenData = await tokenRes.json();
+  const access_token = tokenData.access_token;
+
+  if (!access_token) {
+    return (
+      <div className="text-red-500 text-center p-6">
+        Failed to retrieve Spotify token.
+      </div>
+    );
+  }
+
+  const albumRes = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
+  });
+
+  if (!albumRes.ok) {
+    return (
+      <div className="text-red-500 text-center p-6">
+        Failed to load album. Please try again later.
+      </div>
+    );
+  }
+
+  const album = await albumRes.json();
+
+  return (
+    <>
+      <Navbar />
+  
+      {/* Album Page Content */}
+      <div className="mt-24 max-w-4xl mx-auto text-white px-6 py-8">
+        {/* Album Header Section */}
+        <div className="flex flex-col md:flex-row items-start gap-6">
+          <Image
+            src={album.images[0].url}
+            alt={album.name}
+            width={300}
+            height={300}
+            className="rounded-xl shadow-lg"
+          />
+          <div className="text-center md:text-left">
+            <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
+            <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
+            <p className="text-2xl font-bold text-gray-300 mt-1">
+              {album.artists.map((a: any) => a.name).join(", ")}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
+          </div>
+        </div>
+  
+        {/* Tracklist Section */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Tracklist</h2>
+          <ol className="list-decimal list-inside space-y-2">
+            {album.tracks.items.map((track: any) => (
+              <li key={track.id} className="text-gray-300">
+                {track.name} — {Math.floor(track.duration_ms / 60000)}:
+                {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </>
+  );  
+}

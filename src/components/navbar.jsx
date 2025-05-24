@@ -12,7 +12,7 @@ export default function Navbar() {
     const user = useUser();
 
     return (
-        <nav className="fixed w-full bg-black bg-opacity-90 text-white z-10 px-6 py-4">
+        <nav className="fixed top-0 left-0w-full bg-black bg-opacity-90 text-white z-10 px-6 py-4">
             <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Image
@@ -26,7 +26,7 @@ export default function Navbar() {
 
                 {/*Desktop Nav*/}
                 <div className="hidden md:flex items-center space-x-8">
-                    <Link href="/discover" className="hover:text-blue-500 transition">Discover</Link>
+                    <Link href="/search" className="hover:text-blue-500 transition">Discover</Link>
                     <Link href="/trending" className="hover:text-blue-500 transition">Trending</Link>
                     <Link href="/sessions" className="hover:text-blue-500 transition">Sessions</Link>
                     <Link href="/reviews" className="hover:text-blue-500 transition">Reviews</Link>
