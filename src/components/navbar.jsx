@@ -12,7 +12,7 @@ export default function Navbar() {
     const user = useUser();
 
     return (
-        <nav className="fixed top-0 left-0w-full bg-black bg-opacity-90 text-white z-10 px-6 py-4">
+        <nav className="fixed top-0 left-0 w-full bg-black bg-opacity-90 text-white z-10 px-6 py-4">
             <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center">
                     <Image
@@ -26,20 +26,20 @@ export default function Navbar() {
 
                 {/*Desktop Nav*/}
                 <div className="hidden md:flex items-center space-x-8">
-                    <Link href="/search" className="hover:text-blue-500 transition">Discover</Link>
-                    <Link href="/trending" className="hover:text-blue-500 transition">Trending</Link>
-                    <Link href="/sessions" className="hover:text-blue-500 transition">Sessions</Link>
-                    <Link href="/reviews" className="hover:text-blue-500 transition">Reviews</Link>
+                    <Link href="/search" className="hover:text-blue-500  font-bold transition">Discover</Link>
+                    <Link href="/trending" className="hover:text-blue-500 font-bold transition">Trending</Link>
+                    <Link href="/sessions" className="hover:text-blue-500 font-bold transition">Sessions</Link>
+                    <Link href="/reviews" className="hover:text-blue-500 font-bold transition">Reviews</Link>
                     
                     {user ? (
                         <form method="POST" action="/api/logout">
-                            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
                                 Log Out
                             </button>
                         </form>
                     ) : (
                         <Link href="/signup">
-                            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                            <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
                                 Sign Up
                             </button>
                         </Link>

@@ -62,24 +62,42 @@ export default async function AlbumPage({
           <div className="text-center md:text-left">
             <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
             <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
-            <p className="text-2xl font-bold text-gray-300 mt-1">
+            <p className="text-2xl font-bold text-blue-500 mt-1">
               {album.artists.map((a: any) => a.name).join(", ")}
             </p>
             <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
+
           </div>
         </div>
   
         {/* Tracklist Section */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Tracklist</h2>
-          <ol className="list-decimal list-inside space-y-2">
-            {album.tracks.items.map((track: any) => (
-              <li key={track.id} className="text-gray-300">
-                {track.name} — {Math.floor(track.duration_ms / 60000)}:
+          <ol className="mt-8 space-y-4">
+            {album.tracks.items.map((track: any, index: number) => (
+              <li key={track.id} className="flex justify-between items-start">
+                {/* Left Section: Track number + Title + Artists */}
+                <div className="flex gap-4">
+                  <span className="w-6 text-right text-sm text-gray-500">{index + 1}</span>
+                  <div>
+                    <p className="text-white text-base font-medium">{track.name}</p>
+                      {track.artists.length > 1 && (
+                    <p className="text-sm text-gray-400">
+                      {track.artists.map((artist: any) => artist.name).join(', ')}
+                    </p>
+                  )}
+                  </div>
+                 </div>
+
+              {/* Right Section: Duration */}
+              <span className="text-sm text-gray-400">
+                {Math.floor(track.duration_ms / 60000)}:
                 {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-              </li>
-            ))}
+              </span>
+            </li>
+           ))}
           </ol>
+
         </div>
       </div>
     </>
