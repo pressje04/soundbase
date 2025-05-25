@@ -13,14 +13,15 @@ export default function SearchBar({onSearch}: {onSearch: (query: string) => void
     };
 
     return (
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="flex w-full items-center gap-2">
             <input
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search for artists or albums..."
-                className="px-4 py-2 rounded bg-black text-white border border-gray-600"
+                className="flex-grow px-4 py-2 rounded bg-black text-white border border-gray-600"
             />
+
             <button
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

@@ -1,17 +1,21 @@
 import Image from 'next/image';
 import Navbar from '@/components/navbar';
+import ScorePill from '@/components/ScorePill';
+import ReviewForm from '@/components/ReviewForm';
 
 export default async function AlbumPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string }; // ✅ No Promise
 }) {
-  const { id } = await params;
+  const { id } = params;
 
   const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
-      Authorization: `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+      ).toString('base64')}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: 'grant_type=client_credentials',
@@ -47,8 +51,7 @@ export default async function AlbumPage({
   return (
     <>
       <Navbar />
-  
-      {/* Album Page Content */}
+
       <div className="mt-24 max-w-4xl mx-auto text-white px-6 py-8">
         {/* Album Header Section */}
         <div className="flex flex-col md:flex-row items-start gap-6">
@@ -59,47 +62,55 @@ export default async function AlbumPage({
             height={300}
             className="rounded-xl shadow-lg"
           />
-          <div className="text-center md:text-left">
-            <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
-            <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
-            <p className="text-2xl font-bold text-blue-500 mt-1">
-              {album.artists.map((a: any) => a.name).join(", ")}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
 
+          <div className="flex flex-col justify-between h-[300px] text-center md:text-left">
+            <div>
+              <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
+              <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
+              <p className="text-2xl font-bold text-blue-500 mt-1">
+                {album.artists.map((a: any) => a.name).join(', ')}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
+            </div>
+
+            <div>
+              <ScorePill score={null} />
+              <button
+                // onClick={() => setShowReview(true)}
+                className="mt-4 text-xl ml-6 px-4 py-2 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
-  
+
         {/* Tracklist Section */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Tracklist</h2>
           <ol className="mt-8 space-y-4">
             {album.tracks.items.map((track: any, index: number) => (
               <li key={track.id} className="flex justify-between items-start">
-                {/* Left Section: Track number + Title + Artists */}
                 <div className="flex gap-4">
                   <span className="w-6 text-right text-sm text-gray-500">{index + 1}</span>
                   <div>
                     <p className="text-white text-base font-medium">{track.name}</p>
-                      {track.artists.length > 1 && (
-                    <p className="text-sm text-gray-400">
-                      {track.artists.map((artist: any) => artist.name).join(', ')}
-                    </p>
-                  )}
+                    {track.artists.length > 1 && (
+                      <p className="text-sm text-gray-400">
+                        {track.artists.map((artist: any) => artist.name).join(', ')}
+                      </p>
+                    )}
                   </div>
-                 </div>
-
-              {/* Right Section: Duration */}
-              <span className="text-sm text-gray-400">
-                {Math.floor(track.duration_ms / 60000)}:
-                {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
-              </span>
-            </li>
-           ))}
+                </div>
+                <span className="text-sm text-gray-400">
+                  {Math.floor(track.duration_ms / 60000)}:
+                  {String(Math.floor((track.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                </span>
+              </li>
+            ))}
           </ol>
-
         </div>
       </div>
     </>
-  );  
+  );
 }
