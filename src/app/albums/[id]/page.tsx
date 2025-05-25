@@ -2,13 +2,17 @@ import Image from 'next/image';
 import Navbar from '@/components/navbar';
 import ScorePill from '@/components/ScorePill';
 import ReviewForm from '@/components/ReviewForm';
+import ReviewButton from '@/components/ReviewButton';
+import Albumdash from '@/components/Albumdash';
+import ReviewList from '@/components/ReviewList';
 
 export default async function AlbumPage({
   params,
 }: {
-  params: { id: string }; // ✅ No Promise
+  params: { id: string };
 }) {
   const { id } = params;
+  
 
   const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
@@ -73,15 +77,7 @@ export default async function AlbumPage({
               <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
             </div>
 
-            <div>
-              <ScorePill score={null} />
-              <button
-                // onClick={() => setShowReview(true)}
-                className="mt-4 text-xl ml-6 px-4 py-2 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition"
-              >
-                +
-              </button>
-            </div>
+            <Albumdash albumId={album.id} />
           </div>
         </div>
 
@@ -110,6 +106,9 @@ export default async function AlbumPage({
             ))}
           </ol>
         </div>
+
+        <h2 className="text-2xl font-semibold mt-12 mb-4">Reviews</h2>
+        <ReviewList albumId={album.id} />
       </div>
     </>
   );

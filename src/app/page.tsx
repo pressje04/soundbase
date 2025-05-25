@@ -7,7 +7,7 @@ import useUser from '@/hooks/useUser';
 
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
-  const user = useUser(); // Custom hook to see if user is logged in
+  const {user, loading} = useUser(); // Custom hook to see if user is logged in
 
   useEffect(() => {
     async function fetchAlbums() {
@@ -28,13 +28,16 @@ export default function Page() {
     <>
     <Navbar />
     <div className="mt-12 flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 text-center">
-      <h1 className="text-5xl font-bold mb-4">
-        {user ? (
-          <>Welcome to Soundbase, {user.firstName}!</>
-        ) : (
-          <>Don’t just listen... <span className="text-blue-500">Discover</span> music.</>
-        )}
-      </h1>
+    <h1 className="text-5xl font-bold mb-4">
+  {loading ? (
+    <>Loading...</>
+  ) : user ? (
+    <>Welcome to Soundbase, {user.firstName}!</>
+  ) : (
+    <>Don’t just listen... <span className="text-blue-500">Discover</span> music.</>
+  )}
+</h1>
+
       <p className="text-lg max-w-2xl text-gray-400">
         Dive into fresh sounds, uncover hidden gems, and redefine your listening experience.
         Connect with others, host listening sessions, and share your insights through reviews.

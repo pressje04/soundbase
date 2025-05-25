@@ -5,6 +5,28 @@ import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
+export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url);
+    const albumId = searchParams.get('albumId');
+  
+    if (!albumId) {
+      return NextResponse.json([], { status: 200 });
+    }
+  
+    try {
+      const reviews = await prisma.review.findMany({
+        where: { albumId },
+        orderBy: { createdAt: 'desc' },
+        include: {user: true},
+      });
+  
+      return NextResponse.json(reviews);
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err);
+      return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    }
+  }
+
 export async function POST(req: NextRequest) {
   const { rating, text, albumId } = await req.json();
   const token = req.cookies.get('token')?.value;

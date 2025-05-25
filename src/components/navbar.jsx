@@ -27,7 +27,7 @@ export default function Navbar() {
                 {/*Desktop Nav*/}
                 <div className="hidden md:flex items-center space-x-8">
                     <Link href="/search" className="hover:text-blue-500  font-bold transition">Discover</Link>
-                    <Link href="/trending" className="hover:text-blue-500 font-bold transition">Trending</Link>
+                    <Link href="/profile" className="hover:text-blue-500 font-bold transition">Profile</Link>
                     <Link href="/sessions" className="hover:text-blue-500 font-bold transition">Sessions</Link>
                     <Link href="/reviews" className="hover:text-blue-500 font-bold transition">Reviews</Link>
                     

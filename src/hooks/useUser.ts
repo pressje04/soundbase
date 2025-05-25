@@ -1,28 +1,34 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 
 type User = {
-    id: string;
-    firstName: string
+  id: string;
+  firstName: string;
+  createdAt: string;
 };
 
 export default function useUser() {
-    const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchUser() {
-            try {
-                const res = await fetch('/api/me');
-                if (!res.ok) return;
-                const data = await res.json();
-                setUser(data.user);
-            } catch {
-                setUser(null);
-            }
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch('/api/me');
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
         }
-        fetchUser();
-    }, []);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    return user;
+    fetchUser();
+  }, []);
+
+  return { user, loading };
 }
