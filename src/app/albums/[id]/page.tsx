@@ -5,6 +5,7 @@ import ReviewForm from '@/components/ReviewForm';
 import ReviewButton from '@/components/ReviewButton';
 import Albumdash from '@/components/Albumdash';
 import ReviewList from '@/components/ReviewList';
+import Link from 'next/link';
 
 export default async function AlbumPage({
   params,
@@ -71,13 +72,28 @@ export default async function AlbumPage({
             <div>
               <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
               <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
-              <p className="text-2xl font-bold text-blue-500 mt-1">
-                {album.artists.map((a: any) => a.name).join(', ')}
-              </p>
+              <div className="text-2xl font-bold mt-1 flex flex-wrap gap-2">
+                {album.artists.map((artist: any) => (
+                  <Link
+                      key={artist.id}
+                      href={`/artists/${artist.id}`}
+                      className="text-blue-500 hover:underline"
+                  >
+                  {artist.name}
+                   </Link>
+  ))}
+</div>
+
               <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
             </div>
 
-            <Albumdash albumId={album.id} />
+            <Albumdash
+              albumId={album.id}
+              albumName={album.name}
+              artistName={album.artists.map((a: any) => a.name).join(', ')}
+              releaseYear={album.release_date.slice(0, 4)}
+              imageUrl={album.images?.[0]?.url ?? ''}
+            />
           </div>
         </div>
 

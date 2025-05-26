@@ -13,6 +13,8 @@ Could be altered so that it's design is more modular and reusable
 
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const client_id = process.env.SPOTIFY_CLIENT_ID!;
     const client_secret = process.env.SPOTIFY_CLIENT_SECRET;

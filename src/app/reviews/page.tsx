@@ -8,18 +8,21 @@ import ReviewForm from '@/components/ReviewForm';
 export default function ReviewPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading } = useUser(); // ✅ destructure new loading state
+  const { user, loading } = useUser();
 
   const preselectedAlbumId = searchParams.get('albumId');
   const [albumId, setAlbumId] = useState(preselectedAlbumId || '');
   const [albums, setAlbums] = useState<any[]>([]);
+  const [albumMeta, setAlbumMeta] = useState<{
+    albumName: string;
+    artistName: string;
+    releaseYear: string;
+    imageUrl: string;
+  } | null>(null);
 
-  // ⛔️ Don't redirect until loading completes
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      router.replace('/signup'); // prevent back loop
-    }
+    if (!user) router.replace('/signup');
   }, [loading, user, router]);
 
   useEffect(() => {
@@ -31,23 +34,75 @@ export default function ReviewPage() {
     }
   }, [preselectedAlbumId]);
 
-  // ⏳ Show loading message while checking auth
+  useEffect(() => {
+    async function fetchAlbumDetails() {
+      if (!albumId) return;
+
+      try {
+        const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${btoa(`${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID}:${process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET}`)}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: 'grant_type=client_credentials',
+        });
+
+        const tokenData = await tokenRes.json();
+        const accessToken = tokenData.access_token;
+
+        const albumRes = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        const album = await albumRes.json();
+
+        setAlbumMeta({
+          albumName: album.name,
+          artistName: album.artistName.map((a: any) => a.name).join(', '),
+          releaseYear: album.release_date.slice(0, 4),
+          imageUrl: album.images?.[0]?.url || '',
+        });
+      } catch (err) {
+        console.error('Error fetching album details:', err);
+      }
+    }
+
+    fetchAlbumDetails();
+  }, [albumId]);
+
   if (loading) {
     return <div className="text-white text-center p-10">Checking authentication...</div>;
   }
 
-  // ❌ If unauthenticated, do not render anything
   if (!user) return null;
 
-  const handleSubmit = async (score: number, comment: string) => {
+  const handleSubmit = async ({
+    score,
+    text,
+    albumName,
+    artistName,
+    releaseYear,
+    imageUrl,
+  }: {
+    score: number;
+    text: string;
+    albumName: string;
+    artistName: string;
+    releaseYear: string;
+    imageUrl: string;
+  }) => {
     const res = await fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         albumId,
         rating: score,
-        comment,
-        userId: user.id,
+        text,
+        albumName,
+        artistName,
+        releaseYear,
+        imageUrl,
       }),
     });
 
@@ -80,11 +135,15 @@ export default function ReviewPage() {
           </div>
         )}
 
-        {albumId && (
+        {albumId && albumMeta && (
           <ReviewForm
             userId={user.id}
             onClose={() => router.push(`/albums/${albumId}`)}
             onSubmit={handleSubmit}
+            albumName={albumMeta.albumName}
+            artistName={albumMeta.artistName}
+            releaseYear={albumMeta.releaseYear}
+            imageUrl={albumMeta.imageUrl}
           />
         )}
       </div>

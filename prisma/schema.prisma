@@ -18,7 +18,11 @@ model Review {
   user     User     @relation(fields: [userId], references: [id])
   userId   String   
   albumId  String
+  albumName String
+  artistName String
   rating   Float
+  releaseYear String
+  imageUrl String
   comment  String?
   createdAt DateTime @default(now())
 }

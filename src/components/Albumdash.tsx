@@ -6,13 +6,26 @@ import ScorePill from './ScorePill';
 import useUser from '@/hooks/useUser';
 import { useRouter } from 'next/navigation';
 
-export default function AlbumReviewSection({ albumId }: { albumId: string }) {
+type Props = {
+  albumId: string;
+  albumName: string;
+  artistName: string;
+  releaseYear: string;
+  imageUrl: string;
+};
+
+export default function AlbumReviewSection({
+  albumId,
+  albumName,
+  artistName,
+  releaseYear,
+  imageUrl,
+}: Props) {
   const [showForm, setShowForm] = useState(false);
   const [reviews, setReviews] = useState<{ rating: number; comment: string }[]>([]);
-  const {user} = useUser();
+  const { user } = useUser();
   const router = useRouter();
 
-  // ✅ Fetch reviews once on mount
   useEffect(() => {
     async function fetchReviews() {
       try {
@@ -27,8 +40,21 @@ export default function AlbumReviewSection({ albumId }: { albumId: string }) {
     fetchReviews();
   }, [albumId]);
 
-  // ✅ Called when new review is submitted
-  const handleReviewSubmit = async (rating: number, comment: string) => {
+  const handleReviewSubmit = async ({
+    score,
+    text,
+    albumName,
+    artistName,
+    releaseYear,
+    imageUrl,
+  }: {
+    score: number;
+    text: string;
+    albumName: string;
+    artistName: string;
+    releaseYear: string;
+    imageUrl: string;
+  }) => {
     if (!user) {
       router.push('/signup');
       return;
@@ -38,12 +64,21 @@ export default function AlbumReviewSection({ albumId }: { albumId: string }) {
       const res = await fetch('/api/reviews', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ albumId, rating, text: comment, userId: user.id }),
+        body: JSON.stringify({
+          albumId,
+          albumName,
+          artistName,
+          releaseYear,
+          imageUrl,
+          rating: score,
+          text,
+          userId: user.id,
+        }),
       });
 
       if (res.ok) {
         const newReview = await res.json();
-        setReviews((prev) => [...prev, newReview]); // ✅ updates score
+        setReviews((prev) => [...prev, newReview]);
       } else {
         const error = await res.json();
         console.error('Error submitting review:', error);
@@ -61,7 +96,6 @@ export default function AlbumReviewSection({ albumId }: { albumId: string }) {
   return (
     <div className="mt-8">
       <div className="flex items-center gap-4">
-        {/* ✅ Will re-render automatically when averageRating updates */}
         <ScorePill score={averageRating} />
         <button
           onClick={() => setShowForm(true)}
@@ -76,6 +110,10 @@ export default function AlbumReviewSection({ albumId }: { albumId: string }) {
           userId={user?.id || null}
           onClose={() => setShowForm(false)}
           onSubmit={handleReviewSubmit}
+          albumName={albumName}
+          artistName={artistName}
+          releaseYear={releaseYear}
+          imageUrl={imageUrl}
         />
       )}
     </div>

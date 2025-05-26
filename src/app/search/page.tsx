@@ -8,6 +8,7 @@ import Navbar from '@/components/navbar';
 import SearchAlbumCard from '@/components/SearchAlbumCard';
 
 export default function SearchPage() {
+  
   const [albums, setAlbums] = useState<any[]>([]);
   const [artists, setArtists] = useState<any[]>([]);
 
@@ -21,12 +22,28 @@ export default function SearchPage() {
     });
 
     const data = await res.json();
-    setAlbums(data.albums?.items || []);
+    const rawAlbums = data.albums?.items || [];
+
+    const albumMap = new Map();
+
+    rawAlbums.forEach((album: any) => {
+    const key = `${album.name.toLowerCase()}-${album.artists.map((ar: any) => ar.name.toLowerCase()).join(',')}`;
+
+    const existing = albumMap.get(key);
+
+    // Prefer explicit version
+    if (!existing || (album.explicit && !existing.explicit)) {
+      albumMap.set(key, album);
+    }
+  });
+
+setAlbums(Array.from(albumMap.values()));
+
     setArtists(data.artists?.items || []);
   };
 
   return (
-    <div className="pt-24 text-white">
+    <div className="pt-32 text-white">
       <Navbar />
 
       <div className="text-center px-4">
