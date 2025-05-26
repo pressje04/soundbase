@@ -88,6 +88,11 @@ setAlbums(Array.from(albumMap.values()));
                 key={artist.id}
                 className="bg-gray-800 p-3 rounded text-center hover:bg-gray-700 transition"
               >
+                <Link
+                    key={artist.id}
+                    href={`/artists/${artist.id}`}
+                    className="hover:text-gray-300"
+                >
                 {artist.images?.[0] && (
                   <Image
                     src={artist.images[0].url}
@@ -98,6 +103,7 @@ setAlbums(Array.from(albumMap.values()));
                   />
                 )}
                 <p className="mt-2 font-semibold">{artist.name}</p>
+                </Link>
               </div>
             ))}
           </div>
