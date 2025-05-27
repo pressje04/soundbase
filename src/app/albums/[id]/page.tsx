@@ -6,6 +6,7 @@ import ReviewButton from '@/components/ReviewButton';
 import Albumdash from '@/components/Albumdash';
 import ReviewList from '@/components/ReviewList';
 import Link from 'next/link';
+import AlbumPlayerClient from '@/components/AlbumPlayerClient';
 
 export default async function AlbumPage({
   params,
@@ -81,12 +82,13 @@ export default async function AlbumPage({
                   >
                   {artist.name}
                    </Link>
-  ))}
-</div>
+                ))}
+            </div>
 
               <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
             </div>
 
+            <AlbumPlayerClient albumId={album.id}/>
             <Albumdash
               albumId={album.id}
               albumName={album.name}

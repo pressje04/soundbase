@@ -35,4 +35,21 @@ model User {
   firstName String
   reviews   Review[]
   createdAt DateTime @default(now())
+
+  followers Follows[] @relation("UserFollowers")
+  following Follows[] @relation("UserFollowing")
+}
+
+model Follows {
+  id  String @id @default(uuid())
+
+  followerId String
+  followingId String
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id])
+  following User @relation("UserFollowers", fields: [followingId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId]) //Can only follow each other once
 }

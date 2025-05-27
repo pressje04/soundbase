@@ -99,7 +99,7 @@ export default function AlbumReviewSection({
         <ScorePill score={averageRating} />
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition"
+          className="text-xl px-4 py-2 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition"
         >
           +
         </button>

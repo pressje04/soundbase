@@ -48,7 +48,7 @@ setAlbums(Array.from(albumMap.values()));
 
       <div className="text-center px-4">
         <h1 className="text-3xl font-bold mb-4">
-          All Music, At Your Fingertips
+          All Music - At Your Fingertips
         </h1>
 
         {/* Centered search bar */}

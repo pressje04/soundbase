@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react'; 
-import Navbar from "../components/navbar.jsx";
+import Navbar from "../components/navbar";
 import AlbumScroll from "@/components/albumscroll";
 import useUser from '@/hooks/useUser';
 
@@ -43,7 +43,7 @@ export default function Page() {
   return (
     <>
     <Navbar />
-    <div className="pt-12 mt-12 flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 text-center">
+    <div className="pt-12 mt-16 flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 text-center">
     <h1 className="text-5xl font-bold mb-4">
   {loading ? (
     <>Loading...</>
