@@ -1,3 +1,7 @@
+/*Callback page that we use as middleware for Spotify login
+
+This helps myself and the user to detect errors that occur when attempting to log in to Spotify through the app
+*/
 'use client';
 
 import { useEffect, useState } from 'react';

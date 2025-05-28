@@ -59,9 +59,12 @@ export default function Navbar() {
         <div className="hidden md:flex items-center space-x-8">
           <button
             onClick={handleSpotifyLogin}
-            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded"
+            className="transition font-bold"
           >
-            Spotify
+            <img 
+              src="/images/2024 Spotify Brand Assets/Spotify_green.png"
+              alt="Connect with Spotify"
+              className="h-6 w-auto hover"/>
           </button>
           <Link href="/search" className="hover:text-blue-500 font-bold transition">Discover</Link>
           <Link href="/profile" className="hover:text-blue-500 font-bold transition">Profile</Link>

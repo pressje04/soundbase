@@ -1,3 +1,9 @@
+/* This is an API route for logging into the PLATFORM (Not Spotify)
+
+- The Spotify logic is different and does not hinder the app experience at all aside
+from the streaming feature for premium Spotify users
+*/
+
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';

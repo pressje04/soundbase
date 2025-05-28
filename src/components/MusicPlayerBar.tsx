@@ -51,7 +51,10 @@ export default function MusicPlayerBar() {
   const [paused, setPaused] = useState(true);
 
   useEffect(() => {
-    if (window.Spotify) return;
+    if (window.Spotify && window.onSpotifyWebPlaybackSDKReady) {
+        window.onSpotifyWebPlaybackSDKReady();
+        return;
+    };
 
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -152,10 +155,10 @@ export default function MusicPlayerBar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center text-3xl gap-6">
             <button onClick={handleSkipPrev}>⏮</button>
             <button onClick={handlePlayPause}>
-              {paused ? '▶️' : '⏸️'}
+              {paused ? '▶️' : '⏸'}
             </button>
             <button onClick={handleSkipNext}>⏭</button>
           </div>

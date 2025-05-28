@@ -1,3 +1,6 @@
+/* Login API for SPOTIFY, not login for the platform itself.
+This is handled in /app/api/login
+*/
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 

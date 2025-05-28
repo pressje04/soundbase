@@ -1,3 +1,6 @@
+/*API route helpful for gathering the current user who is logged in 
+for permission/authentication purposes*/
+
 import {NextRequest, NextResponse} from 'next/server';
 import jwt from 'jsonwebtoken';
 import {PrismaClient} from '@prisma/client';

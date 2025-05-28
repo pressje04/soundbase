@@ -125,7 +125,7 @@ export default async function AlbumPage({
           </ol>
         </div>
 
-        <h2 className="text-2xl font-semibold mt-12 mb-4">Reviews</h2>
+        <h2 className="text-2xl font-semibold mt-12 mb-8">Reviews</h2>
         <ReviewList albumId={album.id} />
       </div>
     </>

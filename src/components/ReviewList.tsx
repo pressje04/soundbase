@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import ScorePill from './ScorePill';
 
 export default function ReviewList({albumId}: {albumId: string}) {
     const [reviews, setReviews] = useState<any[]>([]);
@@ -19,16 +20,14 @@ export default function ReviewList({albumId}: {albumId: string}) {
     } 
 
     return (
-        <div className="mt-8 space-y-6">
+        <div className="mt-8 mb-24 space-y-6">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-gray-900 rounded p-4 shadow">
+            <div key={review.id} className="bg-black rounded p-4 shadow">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-blue-400">
+                <span className="font-semibold text-blue-600">
                   {review.user?.firstName ?? 'Anonymous'}
                 </span>
-                <span className="text-yellow-400 font-bold">
-                  {review.rating.toFixed(1)} / 10
-                </span>
+                <ScorePill size={'md'} score={review.rating} />
               </div>
               {review.comment && <p className="mt-2 text-gray-200">{review.comment}</p>}
             </div>

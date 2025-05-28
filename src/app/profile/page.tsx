@@ -26,7 +26,7 @@ export default function ProfilePage() {
             reviews[0]
           );
       
-          // 🔐 Fetch Spotify token
+          //Fetch Spotify token
           const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
@@ -39,7 +39,7 @@ export default function ProfilePage() {
           const tokenData = await tokenRes.json();
           const accessToken = tokenData.access_token;
       
-          // 🎵 Fetch Spotify album details
+          //Fetch Spotify album details
           const albumRes = await fetch(`https://api.spotify.com/v1/albums/${fav.albumId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,

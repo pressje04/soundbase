@@ -1,4 +1,7 @@
 // POST /api/review
+/* This route is used to create a review object in the database from the Review model
+triggered whenever a user submits a review
+*/
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';

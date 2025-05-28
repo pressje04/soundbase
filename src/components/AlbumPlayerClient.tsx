@@ -31,7 +31,7 @@ export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
         onClick={handlePlay}
         disabled={!isConnected}
         className={`py-2 px-4 rounded-xl ${
-          isConnected ? 'bg-black border border-top text-xl font-bold hover:bg-green-600' : 'bg-gray-500 cursor-not-allowed '
+          isConnected ? 'bg-black border border-top text-xl font-bold hover:bg-blue-600' : 'bg-gray-500 cursor-not-allowed '
         } text-white`}
       >
         {isConnected ? 'Play Album' : 'Loading...'}

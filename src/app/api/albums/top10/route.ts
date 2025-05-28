@@ -1,3 +1,5 @@
+/* API route to help fetch the top 10 highest rated albums currently on Soundbase*/
+
 import {NextResponse} from 'next/server';
 import { PrismaClient } from '@prisma/client';
 

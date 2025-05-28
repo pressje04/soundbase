@@ -1,3 +1,4 @@
+/*Page for each artist that will display their metrics as well as their albums and current scores*/
 import Image from 'next/image';
 import Navbar from '@/components/navbar';
 import Link from 'next/link';
