@@ -62,6 +62,11 @@ io.on('connection', (socket) => {
       }
     }
   });
+
+  socket.on('chat_message', (msg) => {
+    io.to(sessionId).emit('chat_message', msg);
+  });
+  
 });
 
 const PORT = 3001;
