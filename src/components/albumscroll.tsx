@@ -1,4 +1,6 @@
 //This is a generic album scrollbar to display different albums
+
+'use client';
 import Image from 'next/image';
 import Link from 'next/link';
 import useAverageScore from '@/hooks/useAverageScore';

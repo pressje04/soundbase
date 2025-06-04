@@ -67,8 +67,29 @@ export default function Navbar() {
               className="h-6 w-auto hover"/>
           </button>
           <Link href="/search" className="hover:text-blue-500 font-bold transition">Discover</Link>
-          <Link href="/profile" className="hover:text-blue-500 font-bold transition">Profile</Link>
-          <Link href="/sessions" className="hover:text-blue-500 font-bold transition">Sessions</Link>
+          {user && (
+  <Link
+    href={`/profile/${user.id}`}
+    className="hover:text-blue-500 font-bold transition"
+  >
+    Profile
+  </Link>
+)}
+          <button
+  onClick={async () => {
+    const res = await fetch('/api/session/create', { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+      window.location.href = `/session/${data.sessionId}`;
+    } else {
+      alert('Failed to start session');
+    }
+  }}
+  className="hover:text-blue-500 font-bold transition"
+>
+  Start Session
+</button>
+
           <Link href="/reviews" className="hover:text-blue-500 font-bold transition">Reviews</Link>
 
           {!loading && user ? (

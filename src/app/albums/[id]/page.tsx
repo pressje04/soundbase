@@ -54,6 +54,21 @@ export default async function AlbumPage({
 
   const album = await albumRes.json();
 
+  // Automatically ensure artist exists in DB
+  await Promise.all(
+    album.artists.map(async (artist: any) => {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/artist/ensure`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: artist.id,
+          name: artist.name,
+        }),
+      });
+    })
+  );
+
+
   return (
     <>
       <Navbar />

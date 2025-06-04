@@ -14,36 +14,23 @@ datasource db {
 }
 
 model Review {
-  id       String   @id @default(uuid())
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String   
-  albumId  String
-  albumName String
-  artistName String
-  rating   Float
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  albumId     String
+  albumName   String
+  artistName  String
+  rating      Float
   releaseYear String
-  imageUrl String
-  comment  String?
-  createdAt DateTime @default(now())
-}
-
-model User {
-  id        String   @id @default(uuid())
-  email     String?  @unique
-  phone     String?  @unique
-  password  String
-  firstName String
-  reviews   Review[]
-  createdAt DateTime @default(now())
-
-  followers Follows[] @relation("UserFollowers")
-  following Follows[] @relation("UserFollowing")
+  imageUrl    String
+  comment     String?
+  createdAt   DateTime @default(now())
 }
 
 model Follows {
-  id  String @id @default(uuid())
+  id String @id @default(uuid())
 
-  followerId String
+  followerId  String
   followingId String
 
   follower  User @relation("UserFollowing", fields: [followerId], references: [id])
@@ -52,4 +39,63 @@ model Follows {
   createdAt DateTime @default(now())
 
   @@unique([followerId, followingId]) //Can only follow each other once
+}
+
+model Artist {
+  id        String         @id
+  name      String
+  followers ArtistFollow[] @relation("ArtistToFollows")
+  createdAt DateTime       @default(now())
+}
+
+model ArtistFollow {
+  id String @id @default(uuid())
+
+  user   User   @relation("UserToArtistFollows", fields: [userId], references: [id])
+  userId String
+
+  artist   Artist @relation("ArtistToFollows", fields: [artistId], references: [id])
+  artistId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artistId])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String?  @unique
+  phone     String?  @unique
+  password  String
+  firstName String
+  createdAt DateTime @default(now())
+
+  reviews   Review[]
+  followers Follows[] @relation("UserFollowers")
+  following Follows[] @relation("UserFollowing")
+
+  artistFollows ArtistFollow[] @relation("UserToArtistFollows")
+
+  hostedSessions      ListeningSession[]   @relation("UserHostSessions")
+  sessionParticipants SessionParticipant[] @relation("UserSessionParticipants")
+}
+
+model ListeningSession {
+  id        String   @id @default(uuid())
+  hostId    String
+  isLive    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  host         User                 @relation("UserHostSessions", fields: [hostId], references: [id])
+  participants SessionParticipant[]
+}
+
+model SessionParticipant {
+  id        String   @id @default(uuid())
+  userId    String
+  sessionId String
+  joinedAt  DateTime @default(now())
+
+  user    User             @relation("UserSessionParticipants", fields: [userId], references: [id])
+  session ListeningSession @relation(fields: [sessionId], references: [id])
 }
