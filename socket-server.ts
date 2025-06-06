@@ -66,6 +66,23 @@ io.on('connection', (socket) => {
   socket.on('chat_message', (msg) => {
     io.to(sessionId).emit('chat_message', msg);
   });
+
+  socket.on('ready', ({ sessionId }) => {
+    socket.to(sessionId).emit('ready');
+  });
+  
+  socket.on('offer', ({ sessionId, sdp }) => {
+    socket.to(sessionId).emit('offer', { sdp });
+  });
+  
+  socket.on('answer', ({ sessionId, sdp }) => {
+    socket.to(sessionId).emit('answer', { sdp });
+  });
+  
+  socket.on('ice-candidate', ({ sessionId, candidate }) => {
+    socket.to(sessionId).emit('ice-candidate', { candidate });
+  });
+  
   
 });
 

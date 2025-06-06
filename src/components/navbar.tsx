@@ -7,7 +7,7 @@ import useUser from '@/hooks/useUser';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const {user, loading} = useUser();
+  const { user, loading } = useUser();
 
   // --- PKCE Utils (inlined) ---
   function generateCodeVerifier(length = 128): string {
@@ -64,48 +64,46 @@ export default function Navbar() {
             <img 
               src="/images/2024 Spotify Brand Assets/Spotify_green.png"
               alt="Connect with Spotify"
-              className="h-6 w-auto hover"/>
+              className="h-6 w-auto hover"
+            />
           </button>
-          <Link href="/search" className="hover:text-blue-500 font-bold transition">Discover</Link>
-          {user && (
-  <Link
-    href={`/profile/${user.id}`}
-    className="hover:text-blue-500 font-bold transition"
-  >
-    Profile
-  </Link>
-)}
-          <button
-  onClick={async () => {
-    const res = await fetch('/api/session/create', { method: 'POST' });
-    const data = await res.json();
-    if (res.ok) {
-      window.location.href = `/session/${data.sessionId}`;
-    } else {
-      alert('Failed to start session');
-    }
-  }}
-  className="hover:text-blue-500 font-bold transition"
->
-  Start Session
-</button>
 
-          <Link href="/reviews" className="hover:text-blue-500 font-bold transition">Reviews</Link>
+          <Link href="/search" className="hover:text-blue-500 font-bold transition">
+            Discover
+          </Link>
+
+          {user && (
+            <Link
+              href={`/profile/${user.id}`}
+              className="hover:text-blue-500 font-bold transition"
+            >
+              Profile
+            </Link>
+          )}
+
+          <Link href="/session">
+            <button className="hover:text-blue-500 font-bold transition">
+              Start Session
+            </button>
+          </Link>
+
+          <Link href="/reviews" className="hover:text-blue-500 font-bold transition">
+            Reviews
+          </Link>
 
           {!loading && user ? (
-  <form method="POST" action="/api/logout">
-    <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
-      Log Out
-    </button>
-  </form>
-) : !loading && (
-  <Link href="/signup">
-    <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
-      Sign Up
-    </button>
-  </Link>
-)}
-
+            <form method="POST" action="/api/logout">
+              <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
+                Log Out
+              </button>
+            </form>
+          ) : !loading && (
+            <Link href="/signup">
+              <button className="px-4 py-2 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 transition">
+                Sign Up
+              </button>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

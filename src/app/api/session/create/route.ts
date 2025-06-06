@@ -1,27 +1,26 @@
+// app/api/session/create/route.ts
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUser } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
-export async function POST(req: Request) {
+export async function POST() {
   const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const session = await prisma.listeningSession.create({
+    data: {
+      hostId: user.id,
+    },
+  });
 
-  try {
-    const session = await prisma.listeningSession.create({
-      data: {
-        hostId: user.id,
-        isLive: true,
-      },
-    });
+  await prisma.sessionParticipant.create({
+    data: {
+      sessionId: session.id,
+      userId: user.id,
+    },
+  });
 
-    return NextResponse.json({ sessionId: session.id }, { status: 201 });
-  } catch (error) {
-    console.error('Session creation error:', error);
-    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
-  }
+  return NextResponse.json({ session });
 }

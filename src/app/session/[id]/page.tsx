@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import io from 'socket.io-client';
 import AlbumSelector from '@/components/AlbumSelector';
 import Navbar from '@/components/navbar';
+import VideoCall from '@/components/VideoCall';
 
 type Album = {
   id: string;
@@ -165,10 +166,36 @@ export default function SessionPage() {
             ))}
           </ul>
         </div>
+        {isHost && (
+          <button
+            onClick={async () => {
+            const confirmed = confirm('Are you sure you want to end this session?');
+            if (!confirmed) return;
+
+            const res = await fetch(`/api/session/${session.id}/end`, {
+              method: 'DELETE',
+            });
+
+            if (res.ok) {
+              alert('Session ended.');
+              window.location.href = '/session'; // Redirect to landing
+            } else {
+              const data = await res.json();
+              alert(`Failed to end session: ${data.error}`);
+            }
+         }}
+          className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+        End Session
+        </button>
+      )}
+      <div className="mt-10">
+      <VideoCall sessionId={session.id}/>
+      </div>
       </div>
   
       {/* Right side: chat panel */}
-      <div className="mt-20 w-80 bg-zinc-900 p-4 pb-32 border-l border-zinc-700 flex flex-col">
+      <div className="mt-24 w-80 bg-zinc-900 p-4 pb-32 border-l border-zinc-700 flex flex-col">
         <h2 className="text-lg font-semibold mb-2 text-white">Chat</h2>
         <div className="bg-zinc-900 text-black rounded p-3 flex-1 overflow-y-scroll text-white mb-2">
           {messages.map((msg, idx) => (

@@ -95,6 +95,7 @@ model SessionParticipant {
   userId    String
   sessionId String
   joinedAt  DateTime @default(now())
+  hasJoined Boolean @default(false)
 
   user    User             @relation("UserSessionParticipants", fields: [userId], references: [id])
   session ListeningSession @relation(fields: [sessionId], references: [id])
