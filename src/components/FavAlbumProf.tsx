@@ -23,7 +23,7 @@ export default function FavoriteAlbumCard({
   return (
     <a
       href={`/albums/${albumId}`}
-      className="flex flex-col md:flex-row items-center gap-4 p-4 border bg-gray-900 border-gray-600 rounded hover:bg-gray-800 transition"
+      className="flex flex-col md:flex-row items-center gap-4 p-4 border bg-gray-800 border-gray-800 rounded hover:bg-gray-800 transition"
     >
       {/* Album Image */}
       <Image

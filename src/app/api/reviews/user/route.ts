@@ -1,9 +1,3 @@
-/*API route for getting reviews posted by a user, helpful for:
-
-- Filtering all public reviews for an album and identifying the user's own review
-- Showing all reviews the user has posted in the account page
-*/
-
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
@@ -34,6 +28,12 @@ export async function GET(req: NextRequest) {
         artistName: true,
         releaseYear: true,
         imageUrl: true,
+        user: {
+          select: {
+            firstName: true,
+            image: true,
+          },
+        },
       },
     });
 

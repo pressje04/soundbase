@@ -83,7 +83,7 @@ export default function Navbar() {
 
           <Link href="/session">
             <button className="hover:text-blue-500 font-bold transition">
-              Start Session
+              Sessions
             </button>
           </Link>
 

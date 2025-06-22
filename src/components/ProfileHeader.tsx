@@ -8,6 +8,8 @@ export default function ProfileHeader({
     followingCount,
     onFollowersClick,
     onFollowingClick,
+    image,
+    onAvatarClick
   }: {
     name: string;
     createdAt: string;
@@ -16,16 +18,20 @@ export default function ProfileHeader({
     followingCount?: number;
     onFollowersClick?: () => void;
     onFollowingClick?: () => void;
+    image?: string;
+    onAvatarClick?: () => void;
   }) {
     return (
       <div className="flex w-full items-center gap-x-12 mb-10 md:flex-row md:items-center">
         {/*Name, Join date, profile pic*/}
         <Image
-          src="/images/pfp_default.png"
+          src={image ?? "/images/pfp_default.png"}
           alt="Avatar"
           width={240}
           height={240}
-          className="rounded-full border border-white"
+          onClick={onAvatarClick}
+          className="rounded-full w-70 h-70 border border-white cursor-pointer hover:opacity-80 transition"
+          title={onAvatarClick ? 'Click to change avatar' : 'Profile avatar'}
         />
         <div className="text-center md:text-left">
           <h1 className="text-4xl font-bold text-white">{name}</h1>
