@@ -13,6 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//REVIEWS ARE NOW DEPRECATED - Switched to global Post model for comments + reviews 
 model Review {
   id          String   @id @default(uuid())
   user        User     @relation(fields: [userId], references: [id])
@@ -72,6 +73,10 @@ model User {
   image     String?
 
   reviews   Review[]
+  posts     Post[]
+  likes     Like[]
+  reposts   Repost[]
+
   followers Follows[] @relation("UserFollowers")
   following Follows[] @relation("UserFollowing")
 
@@ -100,4 +105,49 @@ model SessionParticipant {
 
   user    User             @relation("UserSessionParticipants", fields: [userId], references: [id])
   session ListeningSession @relation(fields: [sessionId], references: [id])
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  albumId     String
+  albumName   String
+  artistName  String
+  imageUrl    String
+  rating      Int?      // Only defined for reviews
+  comment     String?   // Used for both comments and reviews
+  parentId    String?   // If this is a reply, link to parent Post
+  parent      Post?     @relation("PostReplies", fields: [parentId], references: [id])
+  replies     Post[]    @relation("PostReplies")
+  isReview    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  likes Like[]
+  reposts Repost[]
+  views Int @default(0)
+}
+
+model Like {
+  id String @id @default(cuid())
+  userId String 
+  postId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+}
+
+model Repost {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId]) // Prevent duplicate reposts
 }

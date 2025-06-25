@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import {Search} from 'lucide-react';
 
 export default function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
   const [query, setQuery] = useState('');
@@ -26,7 +27,7 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
         type="submit"
         className="px-4 py-2 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
       >
-        Search
+        <Search size={16} />
       </button>
     </form>
   );

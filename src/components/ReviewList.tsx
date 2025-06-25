@@ -4,32 +4,37 @@ import { useEffect, useState } from 'react';
 import ScorePill from './ScorePill';
 import Image from 'next/image';
 
-export default function ReviewList({ albumId }: { albumId: string }) {
-  const [reviews, setReviews] = useState<any[]>([]);
+export default function PostList({ albumId }: { albumId: string }) {
+  const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
-    async function fetchReviews() {
-      const res = await fetch(`/api/reviews?albumId=${albumId}`);
+    async function fetchPosts() {
+      const res = await fetch(`/api/posts?albumId=${albumId}`);
       const data = await res.json();
-      setReviews(data);
+      setPosts(data.filter((p: any) => p.parentId === null)); // Only top-level
     }
-    fetchReviews();
+    fetchPosts();
   }, [albumId]);
 
-  if (reviews.length === 0) {
-    return <p className="text-gray-400 mt-6">No reviews yet. Wanna be the first?</p>;
+  if (posts.length === 0) {
+    return <p className="text-gray-400 mt-6">No posts yet. Wanna be the first?</p>;
   }
 
   return (
     <div className="mt-8 mb-24 space-y-6">
-      {reviews.map((review) => (
-        <div key={review.id} className="bg-zinc-900 rounded-xl p-4 shadow-sm border border-zinc-700">
+      {posts.map((post, index) => (
+        <div
+          key={post.id}
+          className={`p-4 shadow-sm border-zinc-700 ${
+            index !== 0 ? 'border-t border-gray-700' : ''
+          }`}
+        >
           <div className="flex items-start gap-4">
             {/* Profile Image */}
             <div className="shrink-0">
-              {review.user?.image ? (
+              {post.user?.image ? (
                 <Image
-                  src={review.user.image}
+                  src={post.user.image}
                   alt="Profile"
                   width={48}
                   height={48}
@@ -37,23 +42,33 @@ export default function ReviewList({ albumId }: { albumId: string }) {
                 />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-                  {review.user?.firstName?.charAt(0) ?? 'A'}
+                  {post.user?.firstName?.charAt(0) ?? 'A'}
                 </div>
               )}
             </div>
 
-            {/* Review Content */}
+            {/* Content */}
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-white">
-                  {review.user?.firstName ?? 'Anonymous'}
-                </span>
-                <ScorePill size="md" score={review.rating} />
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-white">
+                    {post.user?.firstName ?? 'Anonymous'}
+                  </span>
+                  {post.isReview && (
+                    <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      Review
+                    </span>
+                  )}
+                </div>
+                {post.isReview && <ScorePill size="md" score={post.rating} />}
               </div>
-              {review.comment && (
-                <p className="mt-1 text-gray-300 whitespace-pre-wrap">{review.comment}</p>
+
+              {post.comment && (
+                <p className="mt-1 text-gray-300 whitespace-pre-wrap">{post.comment}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">{new Date(review.createdAt).toLocaleString()}</p>
+              <p className="mt-1 text-xs text-gray-500">
+                {new Date(post.createdAt).toLocaleString()}
+              </p>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ type ReviewFormProps = {
     artistName: string;
     releaseYear: string;
     imageUrl: string;
+    isReview: boolean
   }) => void;
   userId: string | null;
   albumName: string;
@@ -47,7 +48,14 @@ export default function ReviewForm({
     if (score < 0 || score > 10) return alert('Score must be between 0 and 10');
     if (text.trim().length === 0) return alert('Review text cannot be empty');
 
-    onSubmit({ score, text, albumName, artistName, releaseYear, imageUrl });
+    onSubmit({ 
+      score, 
+      text, 
+      albumName, 
+      artistName, 
+      releaseYear, 
+      imageUrl,
+      isReview: true });
     onClose();
   };
 

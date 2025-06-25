@@ -47,6 +47,7 @@ export default function AlbumReviewSection({
     artistName,
     releaseYear,
     imageUrl,
+    isReview,
   }: {
     score: number;
     text: string;
@@ -54,6 +55,7 @@ export default function AlbumReviewSection({
     artistName: string;
     releaseYear: string;
     imageUrl: string;
+    isReview: boolean;
   }) => {
     if (!user) {
       router.push('/signup');
@@ -61,18 +63,17 @@ export default function AlbumReviewSection({
     }
 
     try {
-      const res = await fetch('/api/reviews', {
+      const res = await fetch('/api/posts/new', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           albumId,
           albumName,
           artistName,
-          releaseYear,
           imageUrl,
           rating: score,
-          text,
-          userId: user.id,
+          comment: text,        // ✅ Use correct field name
+          isReview,             // ✅ Ensure this is set to true
         }),
       });
 

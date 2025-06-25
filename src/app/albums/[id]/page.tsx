@@ -4,9 +4,11 @@ import ScorePill from '@/components/ScorePill';
 import ReviewForm from '@/components/ReviewForm';
 import ReviewButton from '@/components/ReviewButton';
 import Albumdash from '@/components/Albumdash';
-import ReviewList from '@/components/ReviewList';
+import PostList from '@/components/PostList';
+import PostItem from '@/components/PostItem';
 import Link from 'next/link';
 import AlbumPlayerClient from '@/components/AlbumPlayerClient';
+import CommentComposer from '@/components/CommentField';
 
 export default async function AlbumPage({
   params,
@@ -26,7 +28,6 @@ export default async function AlbumPage({
     },
     body: 'grant_type=client_credentials',
   });
-
   const tokenData = await tokenRes.json();
   const access_token = tokenData.access_token;
 
@@ -140,8 +141,16 @@ export default async function AlbumPage({
           </ol>
         </div>
 
-        <h2 className="text-2xl font-semibold mt-12 mb-8">Reviews</h2>
-        <ReviewList albumId={album.id} />
+        <h2 className="text-2xl font-semibold mt-12 mb-8">Discussion</h2>
+        <CommentComposer 
+        albumId={album.id}
+        albumName={album.name}
+        artistName={album.artists.map((a: any) => a.name).join(', ')}
+        releaseYear={album.release_date.slice(0, 4)}
+        imageUrl={album.images?.[0]?.url ?? ''} />
+        <PostList albumId={album.id} />
+      </div>
+      <div className="mt-4">
       </div>
     </>
   );

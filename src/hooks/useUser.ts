@@ -6,6 +6,7 @@ type User = {
   id: string;
   firstName: string;
   createdAt: string;
+  image?: string | null;
 };
 
 export default function useUser() {
