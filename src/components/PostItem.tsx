@@ -6,21 +6,27 @@ import Link from 'next/link';
 import { Heart, Repeat2, MessageCircle, Eye, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function PostItem({ 
-  post, 
-  onDelete, 
-  showAlbumInfo = false, }: { post: any; onDelete: (id: string) => void; showAlbumInfo?:boolean }) {
+export default function PostItem({
+  post,
+  onDelete,
+  showAlbumInfo = false,
+}: {
+  post: any;
+  onDelete: (id: string) => void;
+  showAlbumInfo?: boolean;
+}) {
   const [liked, setLiked] = useState(post.likedByCurrentUser || false);
   const [reposted, setReposted] = useState(post.repostedByCurrentUser || false);
   const [likeCount, setLikeCount] = useState(post._count?.likes || 0);
   const [repostCount, setRepostCount] = useState(post._count?.reposts || 0);
-  const [topTracks, setTopTracks] = useState<{ id: string; name: string }[]>([]);
+  const [topTracks, setTopTracks] = useState<
+    { id: string; name: string; imageUrl: string }[]
+  >([]);
 
   const { user } = useUser();
   const router = useRouter();
   const isAuthor = user?.id === post.userId;
 
-  // 🔁 Fetch track names from Spotify
   useEffect(() => {
     const fetchTracks = async () => {
       if (!post.trackRanking || !post.albumId) return;
@@ -29,31 +35,33 @@ export default function PostItem({
         const tokenRes = await fetch('/api/token');
         const tokenData = await tokenRes.json();
 
-        const albumRes = await fetch(`https://api.spotify.com/v1/albums/${post.albumId}`, {
-          headers: {
-            Authorization: `Bearer ${tokenData.access_token}`,
-          },
-        });
+        const albumRes = await fetch(
+          `https://api.spotify.com/v1/albums/${post.albumId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${tokenData.access_token}`,
+            },
+          }
+        );
 
         const albumData = await albumRes.json();
         const allTracks = albumData.tracks.items;
 
         const ranked = post.trackRanking
-        .map((id: string) => {
-          const match = allTracks.find((track: any) => track.id === id);
-          return match
-            ? {
-                id: match.id,
-                name: match.name,
-                imageUrl: albumData.images?.[0]?.url || '', // ← Album image for each
-              }
-            : null;
-        })
-        .filter(Boolean)
-        .slice(0, 5);
-      
-      setTopTracks(ranked as { id: string; name: string; imageUrl: string }[]);
-      
+          .map((id: string) => {
+            const match = allTracks.find((track: any) => track.id === id);
+            return match
+              ? {
+                  id: match.id,
+                  name: match.name,
+                  imageUrl: albumData.images?.[0]?.url || '',
+                }
+              : null;
+          })
+          .filter(Boolean)
+          .slice(0, 5);
+
+        setTopTracks(ranked as { id: string; name: string; imageUrl: string }[]);
       } catch (err) {
         console.error('Failed to load track ranking:', err);
       }
@@ -81,7 +89,7 @@ export default function PostItem({
   };
 
   const handleDelete = async () => {
-    const confirmed = window.confirm("Are you sure you want to delete this post?");
+    const confirmed = window.confirm('Are you sure you want to delete this post?');
     if (!confirmed) return;
 
     try {
@@ -92,7 +100,7 @@ export default function PostItem({
         console.error('Failed to delete post');
       }
     } catch (err) {
-      console.error("Error while deleting post", err);
+      console.error('Error while deleting post', err);
     }
   };
 
@@ -101,9 +109,8 @@ export default function PostItem({
   }, [post.id]);
 
   return (
-    <div className="w-full max-w-xl mx-auto px-4 border-t border-gray-700 pt-4 pb-6">
+    <div className="w-full max-w-xl mx-auto px-4 border-t border-gray-700 pt-4 pb-6 overflow-x-hidden">
       <div className="flex items-start gap-4">
-        {/* Profile image */}
         <Link href={`/profile/${post.user?.id}`} className="shrink-0">
           {post.user?.image ? (
             <Image
@@ -120,7 +127,6 @@ export default function PostItem({
           )}
         </Link>
 
-        {/* Main content */}
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -134,7 +140,10 @@ export default function PostItem({
               )}
             </div>
             {isAuthor && (
-              <button onClick={handleDelete} className="text-md text-gray-500 hover:text-red-500 ml-auto mr-2 transition">
+              <button
+                onClick={handleDelete}
+                className="text-md text-gray-500 hover:text-red-500 ml-auto mr-2 transition"
+              >
                 <X size={28} strokeWidth={3} />
               </button>
             )}
@@ -148,55 +157,52 @@ export default function PostItem({
             {new Date(post.createdAt).toLocaleString()}
           </p>
 
-          {/* Conditionally render album info */}
           {showAlbumInfo && post.albumId && (
-          <div className="mt-3 flex items-center gap-3 mb-3">
-            <img
-              src={post.imageUrl}
-              alt={post.albumName}
-              className="w-12 h-12 rounded object-cover shadow"
-            />
-          <div className="truncate">
-            <p className="text-sm font-semibold text-white truncate">
-              {post.albumName}
-            </p>
-            <p className="text-xs text-gray-400 truncate">{post.artistName}</p>
-          </div>
-        </div>
-        )}
+            <div className="mt-3 flex items-center gap-3 mb-3">
+              <img
+                src={post.imageUrl}
+                alt={post.albumName}
+                className="w-12 h-12 rounded object-cover shadow flex-shrink-0"
+              />
+              <div className="truncate">
+                <p className="text-sm font-semibold text-white truncate">
+                  {post.albumName}
+                </p>
+                <p className="text-xs text-gray-400 truncate">{post.artistName}</p>
+              </div>
+            </div>
+          )}
 
-          {/* Top Tracks section */}
           {topTracks.length > 0 && (
-  <div className="mt-4 bg-black rounded-xl shadow-md">
-    <h4 className="text-base font-bold text-white mb-4 tracking-wide">
-      Top 5 Tracks
-    </h4>
-    <ol className="space-y-3">
-      {topTracks.map((track, index) => (
-        <li
-          key={track.id}
-          className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg w-full overflow-hidden"
-        >
-          <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-700 text-sm text-gray-300 font-semibold">
-            {index + 1}
-          </div>
+            <div className="mt-4 bg-black rounded-xl shadow-md">
+              <h4 className="text-base font-bold text-white mb-4 tracking-wide">
+                Top 5 Tracks
+              </h4>
+              <ol className="space-y-3">
+                {topTracks.map((track, index) => (
+                  <li
+                    key={track.id}
+                    className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg w-full overflow-hidden"
+                  >
+                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-700 text-sm text-gray-300 font-semibold">
+                      {index + 1}
+                    </div>
 
-          <img
-            src={post.imageUrl}
-            alt={`${track.name} cover`}
-            className="w-10 h-10 rounded object-cover"
-          />
+                    <img
+                      src={track.imageUrl}
+                      alt={`${track.name} cover`}
+                      className="w-10 h-10 rounded object-cover flex-shrink-0"
+                    />
 
-          <span className="text-white text-sm font-medium truncate w-full">
-            {track.name}
-          </span>
-        </li>
-      ))}
-    </ol>
-  </div>
-)}
+                    <span className="text-white text-sm font-medium truncate flex-1">
+                      {track.name}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
 
-          {/* Metrics bar */}
           <div className="flex justify-between w-full mt-3 text-sm text-gray-400 pr-4 pl-1">
             <span className="flex items-center gap-2">
               <MessageCircle size={28} strokeWidth={1.5} />
