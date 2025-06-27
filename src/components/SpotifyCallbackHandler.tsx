@@ -11,8 +11,9 @@ export default function SpotifyCallbackHandler() {
   useEffect(() => {
     async function fetchToken() {
       const code = params.get('code');
+      const state = params.get('state');
+      const codeVerifier = state ? atob(state) : null;
       const errorFromSpotify = params.get('error'); // e.g., "access_denied"
-      const codeVerifier = localStorage.getItem('spotify_code_verifier');
 
       console.log('🔍 Callback Loaded');
       console.log('🎯 Redirect URI:', process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI);
