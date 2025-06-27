@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MessageCircle } from 'lucide-react';
 import ReviewForm from './ReviewForm';
 import ScorePill from './ScorePill';
 import useUser from '@/hooks/useUser';
@@ -67,10 +68,9 @@ export default function Albumdash(props: Props) {
       const createdPost = await res.json();
       const fullPostRes = await fetch(`/api/posts/${createdPost.id}`);
       const fullPost = await fullPostRes.json();
-
-      await fetchReviews();
-      setReviews((prev) => [fullPost, ...prev]);
-      props.onPostSubmit?.(fullPost);
+    
+      props.onPostSubmit?.(fullPost); // ✅ trigger the parent callback
+      router.refresh(); // optional if you want to still refresh the page
     }
   };
 
@@ -80,7 +80,7 @@ export default function Albumdash(props: Props) {
       : null;
 
   return (
-    <div className="mt-8">
+    <div className="mt-4 md:mt-0">
       <div className="flex items-center gap-4">
         <ScorePill score={avgRating} />
         <button
@@ -89,6 +89,19 @@ export default function Albumdash(props: Props) {
         >
           +
         </button>
+
+        <button
+  onClick={() => {
+    const el = document.getElementById('discussion');
+    el?.scrollIntoView({ behavior: 'smooth' });
+  }}
+  className="text-xl px-3 py-3 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition flex items-center justify-center"
+  aria-label="Jump to Discussion"
+>
+  <MessageCircle size={20} />
+</button>
+
+
       </div>
 
       {showForm && (

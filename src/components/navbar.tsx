@@ -70,7 +70,6 @@ export default function Navbar() {
           <Link href="/search" className="hover:text-blue-500 font-bold transition">Discover</Link>
           {user && <Link href={`/profile/${user.id}`} className="hover:text-blue-500 font-bold transition">Profile</Link>}
           <Link href="/session" className="hover:text-blue-500 font-bold transition">Sessions</Link>
-          <Link href="/reviews" className="hover:text-blue-500 font-bold transition">Reviews</Link>
 
           {!loading && user ? (
             <form method="POST" action="/api/logout">
