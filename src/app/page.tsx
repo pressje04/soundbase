@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from "../components/navbar";
 import AlbumScroll from "@/components/albumscroll";
 import useUser from '@/hooks/useUser';
+import Link from 'next/link';
 
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
@@ -58,9 +59,12 @@ export default function Page() {
         Dive into fresh sounds, uncover hidden gems, and redefine your listening experience.
         Connect with others, host listening sessions, and share your insights through reviews.
       </p>
+
+      <Link href={"/search"}>
       <button className="mt-6 px-6 py-3 bg-blue-500 text-white font-semibold text-lg rounded-lg hover:bg-blue-600 transition">
         Start Exploring
       </button>
+      </Link>
 
       <h3 className="mt-18 text-4xl font-bold mb-4">Top 10 Albums on Soundbase</h3>
       {/* Album Carousel */}
