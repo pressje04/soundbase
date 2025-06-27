@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import useUser from '@/hooks/useUser';
 import { Menu, X } from 'lucide-react';
-import { UNSAFE_getTurboStreamSingleFetchDataStrategy } from 'react-router-dom';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
