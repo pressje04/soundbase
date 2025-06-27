@@ -39,10 +39,8 @@ export default function PostList({
   return (
     <div className="mt-8 mb-24 space-y-6 px-4">
       {posts.map((post) => (
-        <div
-          key={post.id}
-          className="w-full max-w-screen-sm mx-auto overflow-hidden"
-        >
+        <div key={post.id} 
+          className="w-full max-w-screen-sm mx-auto overflow-hidden">
           <PostItem post={post} onDelete={handleDelete} />
         </div>
       ))}

@@ -128,7 +128,7 @@ export default function PostItem({
         </Link>
 
         <div className="flex-1">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">
                 {post.user?.firstName ?? 'Anonymous'}
@@ -148,7 +148,9 @@ export default function PostItem({
               </button>
             )}
             {post.rating !== null && post.rating !== undefined && (
+              <span className="shrink-0">
               <ScorePill size="md" score={post.rating} />
+            </span>            
             )}
           </div>
 
