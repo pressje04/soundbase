@@ -1,22 +1,14 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:C5MEjo9MUMH5Mn6d@db.trddkrtwxykzrjzrgrex.supabase.co:5432/postgres"
 }
 
-//REVIEWS ARE NOW DEPRECATED - Switched to global Post model for comments + reviews 
 model Review {
   id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
   userId      String
   albumId     String
   albumName   String
@@ -26,118 +18,104 @@ model Review {
   imageUrl    String
   comment     String?
   createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Follows {
-  id String @id @default(uuid())
-
+  id          String   @id @default(uuid())
   followerId  String
   followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id])
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id])
 
-  follower  User @relation("UserFollowing", fields: [followerId], references: [id])
-  following User @relation("UserFollowers", fields: [followingId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([followerId, followingId]) //Can only follow each other once
+  @@unique([followerId, followingId])
 }
 
 model Artist {
   id        String         @id
   name      String
-  followers ArtistFollow[] @relation("ArtistToFollows")
   createdAt DateTime       @default(now())
+  followers ArtistFollow[] @relation("ArtistToFollows")
 }
 
 model ArtistFollow {
-  id String @id @default(uuid())
-
-  user   User   @relation("UserToArtistFollows", fields: [userId], references: [id])
-  userId String
-
-  artist   Artist @relation("ArtistToFollows", fields: [artistId], references: [id])
-  artistId String
-
+  id        String   @id @default(uuid())
+  userId    String
+  artistId  String
   createdAt DateTime @default(now())
+  artist    Artist   @relation("ArtistToFollows", fields: [artistId], references: [id])
+  user      User     @relation("UserToArtistFollows", fields: [userId], references: [id])
 
   @@unique([userId, artistId])
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String?  @unique
-  phone     String?  @unique
-  password  String
-  firstName String
-  createdAt DateTime @default(now())
-  image     String?
-
-  reviews   Review[]
-  posts     Post[]
-  likes     Like[]
-  reposts   Repost[]
-
-  followers Follows[] @relation("UserFollowers")
-  following Follows[] @relation("UserFollowing")
-
-  artistFollows ArtistFollow[] @relation("UserToArtistFollows")
-
+  id                  String               @id @default(uuid())
+  email               String?              @unique
+  phone               String?              @unique
+  password            String
+  firstName           String
+  createdAt           DateTime             @default(now())
+  image               String?
+  artistFollows       ArtistFollow[]       @relation("UserToArtistFollows")
+  following           Follows[]            @relation("UserFollowing")
+  followers           Follows[]            @relation("UserFollowers")
+  likes               Like[]
   hostedSessions      ListeningSession[]   @relation("UserHostSessions")
+  posts               Post[]
+  reposts             Repost[]
+  reviews             Review[]
   sessionParticipants SessionParticipant[] @relation("UserSessionParticipants")
 }
 
 model ListeningSession {
-  id        String   @id @default(uuid())
-  hostId    String
-  isLive    Boolean  @default(true)
-  createdAt DateTime @default(now())
-
+  id           String               @id @default(uuid())
+  hostId       String
+  isLive       Boolean              @default(true)
+  createdAt    DateTime             @default(now())
   host         User                 @relation("UserHostSessions", fields: [hostId], references: [id])
   participants SessionParticipant[]
 }
 
 model SessionParticipant {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
   userId    String
   sessionId String
-  joinedAt  DateTime @default(now())
-  hasJoined Boolean @default(false)
-
-  user    User             @relation("UserSessionParticipants", fields: [userId], references: [id])
-  session ListeningSession @relation(fields: [sessionId], references: [id])
+  joinedAt  DateTime         @default(now())
+  hasJoined Boolean          @default(false)
+  session   ListeningSession @relation(fields: [sessionId], references: [id])
+  user      User             @relation("UserSessionParticipants", fields: [userId], references: [id])
 }
 
 model Post {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  albumId     String
-  albumName   String
-  artistName  String
-  imageUrl    String
-  rating      Float?      // Only defined for reviews
-  comment     String?   // Used for both comments and reviews
-  parentId    String?   // If this is a reply, link to parent Post
-  parent      Post?     @relation("PostReplies", fields: [parentId], references: [id])
-  replies     Post[]    @relation("PostReplies")
-  isReview    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-
+  id           String   @id @default(cuid())
+  userId       String
+  albumId      String
+  albumName    String
+  artistName   String
+  imageUrl     String
+  rating       Float?
+  comment      String?
+  parentId     String?
+  isReview     Boolean  @default(false)
+  createdAt    DateTime @default(now())
   trackRanking Json?
-
-  likes Like[]
-  reposts Repost[]
-  views Int @default(0)
+  views        Int      @default(0)
+  likes        Like[]
+  parent       Post?    @relation("PostReplies", fields: [parentId], references: [id])
+  replies      Post[]   @relation("PostReplies")
+  user         User     @relation(fields: [userId], references: [id])
+  reposts      Repost[]
 }
 
 model Like {
-  id String @id @default(cuid())
-  userId String 
-  postId String
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-  post Post @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, postId])
 }
@@ -147,9 +125,8 @@ model Repost {
   userId    String
   postId    String
   createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
   post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@unique([userId, postId]) // Prevent duplicate reposts
+  @@unique([userId, postId])
 }

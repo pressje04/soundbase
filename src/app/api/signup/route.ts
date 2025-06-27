@@ -90,9 +90,17 @@ export async function POST(req: NextRequest) {
             { expiresIn: '7d'}
         );
 
-        const response = NextResponse.json(
-            { message: "Signup successful!"}
-        );
+        const response = NextResponse.json({
+            success: true,
+            message: "Signup successful!",
+            user: {
+              id: user.id,
+              email: user.email,
+              phone: user.phone,
+              firstName: user.firstName,
+            },
+          });
+          
         response.cookies.set('token', jwt_token, {
             httpOnly: true, 
             secure: process.env.NODE_ENV === 'production',
