@@ -11,7 +11,14 @@ export default function SpotifyCallbackHandler() {
   useEffect(() => {
     async function fetchToken() {
       const code = params.get('code');
+      const errorFromSpotify = params.get('error'); // e.g., "access_denied"
       const codeVerifier = localStorage.getItem('spotify_code_verifier');
+
+      console.log('🔍 Callback Loaded');
+      console.log('🎯 Redirect URI:', process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI);
+      console.log('🎟️ code:', code);
+      console.log('❓ error:', errorFromSpotify);
+      console.log('🧾 code_verifier from localStorage:', codeVerifier);
 
       if (!code || !codeVerifier) {
         setError("Missing code or code verifier.");
@@ -35,14 +42,15 @@ export default function SpotifyCallbackHandler() {
           body: body.toString(),
         });
 
+        const text = await res.text();
+        console.log('📦 Token response raw:', text);
+
         if (!res.ok) {
-          const errText = await res.text();
-          console.error('Failed to fetch token:', errText);
-          setError('Spotify login failed. Please try again.');
+          setError('Spotify login failed. See console for details.');
           return;
         }
 
-        const data = await res.json();
+        const data = JSON.parse(text);
         localStorage.setItem('spotifyAccessToken', data.access_token);
         if (data.refresh_token) {
           localStorage.setItem('spotifyRefreshToken', data.refresh_token);
@@ -50,7 +58,7 @@ export default function SpotifyCallbackHandler() {
 
         router.push('/');
       } catch (err) {
-        console.error('Unexpected error:', err);
+        console.error('❌ Unexpected error during token fetch:', err);
         setError('An unexpected error occurred.');
       }
     }
@@ -60,7 +68,7 @@ export default function SpotifyCallbackHandler() {
 
   return (
     <div className="text-white p-8">
-      {error ? error : 'Logging you in with Spotify...'}
+      {error ? `⚠️ ${error}` : 'Logging you in with Spotify...'}
     </div>
   );
 }
