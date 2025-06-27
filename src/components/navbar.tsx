@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import useUser from '@/hooks/useUser';
 import { Menu, X } from 'lucide-react';
+import HamburgerMenu from './HamburgerMenu';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -94,34 +95,7 @@ export default function Navbar() {
 
         {/* Hamburger (mobile only) */}
         <div className="md:hidden">
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-white p-2 rounded hover:bg-zinc-700 transition"
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-
-          {/* Dropdown */}
-          {isMenuOpen && (
-            <div className="absolute top-20 right-6 w-48 bg-zinc-900 rounded border border-zinc-700 shadow-md z-50">
-              <ul className="flex flex-col text-white divide-y divide-zinc-700">
-                <li><Link href="/search" className="block px-4 py-2 hover:text-blue-400">Discover</Link></li>
-                <li><Link href="/reviews" className="block px-4 py-2 hover:text-blue-400">Reviews</Link></li>
-                <li><Link href="/session" className="block px-4 py-2 hover:text-blue-400">Sessions</Link></li>
-                {user && <li><Link href={`/profile/${user.id}`} className="block px-4 py-2 hover:text-blue-400">Profile</Link></li>}
-                {!loading && user ? (
-                  <li>
-                    <form method="POST" action="/api/logout">
-                      <button className="w-full text-left px-4 py-2 hover:text-red-400">Log Out</button>
-                    </form>
-                  </li>
-                ) : !loading && (
-                  <li><Link href="/signup" className="block px-4 py-2 hover:text-blue-400">Sign Up</Link></li>
-                )}
-              </ul>
-            </div>
-          )}
+            <HamburgerMenu />
         </div>
       </div>
     </nav>
