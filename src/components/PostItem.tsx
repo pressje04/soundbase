@@ -175,7 +175,7 @@ export default function PostItem({
       {topTracks.map((track, index) => (
         <li
           key={track.id}
-          className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg"
+          className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg w-full overflow-hidden"
         >
           <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-700 text-sm text-gray-300 font-semibold">
             {index + 1}
@@ -187,7 +187,7 @@ export default function PostItem({
             className="w-10 h-10 rounded object-cover"
           />
 
-          <span className="text-white text-sm font-medium truncate">
+          <span className="text-white text-sm font-medium truncate w-full">
             {track.name}
           </span>
         </li>
