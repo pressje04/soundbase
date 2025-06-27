@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
 
     } catch (error) {
         console.error('Signup error: ', error);
+        console.log("🔍 Runtime DATABASE_URL:", process.env.DATABASE_URL);
         return NextResponse.json(
             { error: 'There was a problem during signup'},
             {status: 500}
