@@ -152,7 +152,9 @@ export default function PostItem({
             )}
           </div>
 
-          <p className="mt-1 text-gray-300 whitespace-pre-wrap">{post.comment}</p>
+          <p className="mt-1 text-gray-300 whitespace-pre-wrap break-words">
+            {post.comment}
+          </p>
           <p className="mt-1 text-xs text-gray-500">
             {new Date(post.createdAt).toLocaleString()}
           </p>
