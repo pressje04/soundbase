@@ -101,7 +101,7 @@ export default function PostItem({
   }, [post.id]);
 
   return (
-    <div className="border-t border-gray-700 pt-4 pb-6">
+    <div className="w-full max-w-xl mx-auto px-4 border-t border-gray-700 pt-4 pb-6">
       <div className="flex items-start gap-4">
         {/* Profile image */}
         <Link href={`/profile/${post.user?.id}`} className="shrink-0">
