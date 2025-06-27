@@ -69,7 +69,7 @@ export default function Page() {
         <AlbumScroll albums={topAlbums}/>
       </div>}
 
-      <h3 className="mt-18 text-4xl font-bold mb-4">New Releases</h3>
+      <h3 className="mt-12 text-4xl font-bold mb-4">New Releases</h3>
       {/* Album Carousel */}
       {albums.length > 0 && 
       <div className="mt-6 w-full">

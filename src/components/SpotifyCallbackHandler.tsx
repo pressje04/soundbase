@@ -11,7 +11,7 @@ export default function SpotifyCallbackHandler() {
   useEffect(() => {
     async function fetchToken() {
       const code = params.get('code');
-      const codeVerifier = sessionStorage.getItem('spotify_code_verifier');
+      const codeVerifier = localStorage.getItem('spotify_code_verifier');
 
       if (!code || !codeVerifier) {
         setError("Missing code or code verifier.");

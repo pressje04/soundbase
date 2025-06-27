@@ -30,7 +30,7 @@ export default function Navbar() {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
 
-    sessionStorage.setItem('spotify_code_verifier', verifier);
+    localStorage.setItem('spotify_code_verifier', verifier);
 
     const authUrl = new URL('https://accounts.spotify.com/authorize');
     authUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!);
