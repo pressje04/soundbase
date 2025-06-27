@@ -1,38 +1,80 @@
-// components/HamburgerMenu.tsx
 'use client';
 
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleSpotifyLogin = async () => {
+    const verifier = generateCodeVerifier();
+    const challenge = await generateCodeChallenge(verifier);
+    const authUrl = new URL('https://accounts.spotify.com/authorize');
+
+    authUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('redirect_uri', process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!);
+    authUrl.searchParams.set('scope', 'user-read-private user-read-email streaming');
+    authUrl.searchParams.set('code_challenge_method', 'S256');
+    authUrl.searchParams.set('code_challenge', challenge);
+    authUrl.searchParams.set('state', btoa(verifier));
+
+    window.location.href = authUrl.toString();
+  };
+
+  function generateCodeVerifier(length = 128): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
+
+  async function generateCodeChallenge(verifier: string): Promise<string> {
+    const data = new TextEncoder().encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
   return (
     <div className="lg:hidden fixed top-4 right-4 z-50">
-      {/* Button */}
+      {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-white p-2 bg-zinc-800 rounded hover:bg-zinc-700 transition"
+        className="text-white p-2 bg-zinc-900 rounded-full hover:bg-zinc-700 transition"
         aria-label="Toggle menu"
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
-      {/* Dropdown menu */}
+      {/* Slide-in Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-black rounded shadow-lg border border-zinc-700">
-          <ul className="text-white p-2 space-y-2">
-            <li>
-              <Link href="/profile" className="block hover:text-blue-400">Profile</Link>
-            </li>
-            <li>
-              <Link href="/feed" className="block hover:text-blue-400">Feed</Link>
-            </li>
-            <li>
-              <Link href="/logout" className="block hover:text-red-400">Log Out</Link>
-            </li>
-          </ul>
+        <div className="absolute top-12 right-0 w-60 bg-zinc-950 rounded-xl shadow-xl border border-zinc-800 py-4 px-4 space-y-4 transition-all duration-300">
+          <button
+            onClick={handleSpotifyLogin}
+            className="flex items-center space-x-2 w-full px-4 py-2 bg-green-500 text-black font-bold rounded-md hover:bg-green-600 transition"
+          >
+            <Image
+              src="/images/2024 Spotify Brand Assets/Spotify_icon_RGB_black.png"
+              alt="Spotify"
+              width={20}
+              height={20}
+              className="h-5 w-5"
+            />
+            <span>Login with Spotify</span>
+          </button>
+
+          <Link href="/profile" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
+            Profile
+          </Link>
+          <Link href="/feed" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
+            Feed
+          </Link>
+          <form method="POST" action="/api/logout">
+            <button className="w-full text-left text-red-400 px-4 py-2 rounded hover:bg-zinc-800">
+              Log Out
+            </button>
+          </form>
         </div>
       )}
     </div>
