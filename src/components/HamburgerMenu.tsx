@@ -49,26 +49,22 @@ export default function HamburgerMenu() {
 
       {/* Slide-in Menu */}
       {isOpen && (
-        <div className="absolute top-12 right-0 w-60 bg-zinc-950 rounded-xl shadow-xl border border-zinc-800 py-4 px-4 space-y-4 transition-all duration-300">
-          <button
-            onClick={handleSpotifyLogin}
-            className="flex items-center space-x-2 w-full px-4 py-2 bg-green-500 text-black font-bold rounded-md hover:bg-green-600 transition"
-          >
+        <div className="absolute top-12 right-0 w-56 bg-black rounded-xl shadow-xl border border-zinc-800 py-4 px-4 space-y-4">
+          <button onClick={handleSpotifyLogin} className="w-full text-left">
             <Image
-              src="/images/2024 Spotify Brand Assets/Spotify_icon_RGB_black.png"
+              src="/images/2024 Spotify Brand Assets/Spotify_green.png"
               alt="Spotify"
-              width={20}
-              height={20}
-              className="h-5 w-5"
+              width={100}
+              height={30}
+              className="h-auto"
             />
-            <span>Login with Spotify</span>
           </button>
 
           <Link href="/profile" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
             Profile
           </Link>
-          <Link href="/feed" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
-            Feed
+          <Link href="/session" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
+            Sessions
           </Link>
           <form method="POST" action="/api/logout">
             <button className="w-full text-left text-red-400 px-4 py-2 rounded hover:bg-zinc-800">
