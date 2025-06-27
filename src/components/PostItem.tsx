@@ -109,7 +109,7 @@ export default function PostItem({
   }, [post.id]);
 
   return (
-    <div className="w-full max-w-xl mx-auto px-4 border-t border-gray-700 pt-4 pb-6 overflow-x-hidden">
+    <div className="w-full max-w-xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-700 pt-4 pb-6">
       <div className="flex items-start gap-4">
         <Link href={`/profile/${post.user?.id}`} className="shrink-0">
           {post.user?.image ? (
@@ -203,7 +203,7 @@ export default function PostItem({
             </div>
           )}
 
-          <div className="flex justify-between w-full mt-3 text-sm text-gray-400 pr-4 pl-1">
+<div className="flex flex-wrap justify-between gap-y-2 w-full mt-3 text-sm text-gray-400 px-2 overflow-hidden">
             <span className="flex items-center gap-2">
               <MessageCircle size={28} strokeWidth={1.5} />
               {post._count?.replies || 0}
