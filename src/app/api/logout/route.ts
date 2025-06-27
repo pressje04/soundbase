@@ -12,3 +12,8 @@ export async function POST(req: NextRequest) {
 
     return response;
 }
+
+export async function GET(req: NextRequest) {
+    const origin = req.headers.get('origin') || '/'
+    return NextResponse.redirect(origin)
+  }
