@@ -74,11 +74,18 @@ export default function HamburgerMenu() {
           <Link href="/session" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
             Sessions
           </Link>
-          <form method="POST" action="/api/logout">
-            <button className="w-full text-left text-red-400 px-4 py-2 rounded hover:bg-zinc-800">
-              Log Out
-            </button>
-          </form>
+          {user ? (
+  <form method="POST" action="/api/logout">
+    <button className="w-full text-left text-red-400 px-4 py-2 rounded hover:bg-zinc-800">
+      Log Out
+    </button>
+  </form>
+) : (
+  <Link href="/signup" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
+    Sign Up
+  </Link>
+)}
+
         </div>
       )}
     </div>
