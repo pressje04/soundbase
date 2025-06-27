@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import useUser from '@/hooks/useUser';
 import { Menu, X } from 'lucide-react';
+import { UNSAFE_getTurboStreamSingleFetchDataStrategy } from 'react-router-dom';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,6 +20,14 @@ export default function Navbar() {
     return result;
   }
 
+  function toUrlSafeBase64(str: string): string {
+    return btoa(str)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+  
+
   async function generateCodeChallenge(verifier: string): Promise<string> {
     const data = new TextEncoder().encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
@@ -29,9 +38,7 @@ export default function Navbar() {
   const handleSpotifyLogin = async () => {
     const verifier = generateCodeVerifier();
     const challenge = await generateCodeChallenge(verifier);
-
-    localStorage.setItem('spotify_code_verifier', verifier);
-
+  
     const authUrl = new URL('https://accounts.spotify.com/authorize');
     authUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!);
     authUrl.searchParams.set('response_type', 'code');
@@ -39,9 +46,13 @@ export default function Navbar() {
     authUrl.searchParams.set('scope', 'user-read-private user-read-email streaming');
     authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('code_challenge', challenge);
-
+  
+    // ✅ Send the code_verifier in the state param (base64-encoded)
+    authUrl.searchParams.set('state', toUrlSafeBase64(verifier));
+  
     window.location.href = authUrl.toString();
   };
+  
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-black bg-opacity-90 text-white z-10 px-6 py-4">

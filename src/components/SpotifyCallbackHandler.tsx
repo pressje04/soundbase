@@ -8,11 +8,17 @@ export default function SpotifyCallbackHandler() {
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
+  function fromUrlSafeBase64(str: string): string {
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    while (str.length % 4) str += '=';
+    return atob(str);
+  }
+
   useEffect(() => {
     async function fetchToken() {
       const code = params.get('code');
       const state = params.get('state');
-      const codeVerifier = state ? atob(state) : null;
+      const codeVerifier = state ? fromUrlSafeBase64(state) : null;
       const errorFromSpotify = params.get('error'); // e.g., "access_denied"
 
       console.log('🔍 Callback Loaded');
