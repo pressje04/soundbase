@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import useUser from '@/hooks/useUser';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const {user, loading} = useUser();
 
   const handleSpotifyLogin = async () => {
     const verifier = generateCodeVerifier();
@@ -60,9 +62,15 @@ export default function HamburgerMenu() {
             />
           </button>
 
-          <Link href="/profile" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
-            Profile
-          </Link>
+          {user && (
+  <Link
+    href={`/profile/${user.id}`}
+    className="block text-white px-4 py-2 rounded hover:bg-zinc-800"
+  >
+    Profile
+  </Link>
+)}
+
           <Link href="/session" className="block text-white px-4 py-2 rounded hover:bg-zinc-800">
             Sessions
           </Link>
