@@ -36,15 +36,27 @@ export default async function AlbumPage({ params }: Params) {
 
   const album = await albumRes.json();
 
+  const baseUrl =
+  process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://soundbase.vercel.app';
+ 
   await Promise.all(
     album.artists.map(async (artist: any) => {
-      await fetch(`${process.env.NEXTAUTH_URL}/api/artist/ensure`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: artist.id, name: artist.name }),
-      });
+      try {
+        const res = await fetch(`${baseUrl}/api/artist/ensure`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: artist.id, name: artist.name }),
+        });
+  
+        if (!res.ok) {
+          console.error(`❌ Failed to ensure artist ${artist.name}:`, await res.text());
+        }
+      } catch (err) {
+        console.error(`🔥 Error ensuring artist ${artist.name}:`, err);
+      }
     })
   );
+  
 
   const sharedProps = {
     albumId: album.id,
