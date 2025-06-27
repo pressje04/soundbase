@@ -7,7 +7,7 @@ export function getCurrentUser(): { id: string } | null {
   try {
     const cookieStore = cookies(); // synchronous
     // @ts-expect-error - cookies() is actually synchronous in App Router
-    const token = cookies().get('token')?.value;
+    const token = cookieStore.get('token')?.value;
 
 
     if (!token) return null;

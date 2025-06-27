@@ -1,22 +1,12 @@
 import Image from 'next/image';
 import Navbar from '@/components/navbar';
-import ScorePill from '@/components/ScorePill';
-import ReviewForm from '@/components/ReviewForm';
-import ReviewButton from '@/components/ReviewButton';
-import Albumdash from '@/components/Albumdash';
-import PostList from '@/components/PostList';
-import PostItem from '@/components/PostItem';
 import Link from 'next/link';
 import AlbumPlayerClient from '@/components/AlbumPlayerClient';
-import CommentComposer from '@/components/CommentField';
+import AlbumPageClient from '@/components/AlbumPageClient';
+import Albumdash from '@/components/Albumdash';
 
-export default async function AlbumPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function AlbumPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  
 
   const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
@@ -28,58 +18,53 @@ export default async function AlbumPage({
     },
     body: 'grant_type=client_credentials',
   });
+
   const tokenData = await tokenRes.json();
   const access_token = tokenData.access_token;
 
   if (!access_token) {
-    return (
-      <div className="text-red-500 text-center p-6">
-        Failed to retrieve Spotify token.
-      </div>
-    );
+    return <div className="text-red-500 text-center p-6">Failed to retrieve Spotify token.</div>;
   }
 
   const albumRes = await fetch(`https://api.spotify.com/v1/albums/${id}`, {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
+    headers: { Authorization: `Bearer ${access_token}` },
   });
 
   if (!albumRes.ok) {
-    return (
-      <div className="text-red-500 text-center p-6">
-        Failed to load album. Please try again later.
-      </div>
-    );
+    return <div className="text-red-500 text-center p-6">Failed to load album. Try again later.</div>;
   }
 
   const album = await albumRes.json();
 
-  // Automatically ensure artist exists in DB
+  // Ensure artists exist in DB
   await Promise.all(
     album.artists.map(async (artist: any) => {
       await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/artist/ensure`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: artist.id,
-          name: artist.name,
-        }),
+        body: JSON.stringify({ id: artist.id, name: artist.name }),
       });
     })
   );
 
+  const sharedProps = {
+    albumId: album.id,
+    albumName: album.name,
+    artistName: album.artists.map((a: any) => a.name).join(', '),
+    releaseYear: album.release_date.slice(0, 4),
+    imageUrl: album.images?.[0]?.url ?? '',
+    tracklist: album.tracks.items,
+  };
 
   return (
     <>
       <Navbar />
-
       <div className="mt-24 max-w-4xl mx-auto text-white px-6 py-8">
-        {/* Album Header Section */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row items-start gap-6">
           <Image
-            src={album.images[0].url}
-            alt={album.name}
+            src={sharedProps.imageUrl}
+            alt={sharedProps.albumName}
             width={300}
             height={300}
             className="rounded-xl shadow-lg"
@@ -88,38 +73,31 @@ export default async function AlbumPage({
           <div className="flex flex-col justify-between h-[300px] text-center md:text-left">
             <div>
               <p className="uppercase text-sm text-gray-400 tracking-wide">Album</p>
-              <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{album.name}</h1>
+              <h1 className="text-4xl md:text-5xl font-extrabold mt-2">{sharedProps.albumName}</h1>
               <div className="text-2xl font-bold mt-1 flex flex-wrap gap-2">
                 {album.artists.map((artist: any) => (
                   <Link
-                      key={artist.id}
-                      href={`/artists/${artist.id}`}
-                      className="text-blue-500 hover:underline"
+                    key={artist.id}
+                    href={`/artists/${artist.id}`}
+                    className="text-blue-500 hover:underline"
                   >
-                  {artist.name}
-                   </Link>
+                    {artist.name}
+                  </Link>
                 ))}
-            </div>
-
+              </div>
               <p className="text-sm text-gray-500 mt-1">{album.release_date}</p>
             </div>
 
-            <AlbumPlayerClient albumId={album.id}/>
-            <Albumdash
-              albumId={album.id}
-              albumName={album.name}
-              artistName={album.artists.map((a: any) => a.name).join(', ')}
-              releaseYear={album.release_date.slice(0, 4)}
-              imageUrl={album.images?.[0]?.url ?? ''}
-            />
+            <AlbumPlayerClient albumId={sharedProps.albumId} />
+            <Albumdash {...sharedProps} />
           </div>
         </div>
 
-        {/* Tracklist Section */}
+        {/* Tracklist */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Tracklist</h2>
           <ol className="mt-8 space-y-4">
-            {album.tracks.items.map((track: any, index: number) => (
+            {sharedProps.tracklist.map((track: any, index: number) => (
               <li key={track.id} className="flex justify-between items-start">
                 <div className="flex gap-4">
                   <span className="w-6 text-right text-sm text-gray-500">{index + 1}</span>
@@ -141,16 +119,9 @@ export default async function AlbumPage({
           </ol>
         </div>
 
+        {/* Discussion */}
         <h2 className="text-2xl font-semibold mt-12 mb-8">Discussion</h2>
-        <CommentComposer 
-        albumId={album.id}
-        albumName={album.name}
-        artistName={album.artists.map((a: any) => a.name).join(', ')}
-        releaseYear={album.release_date.slice(0, 4)}
-        imageUrl={album.images?.[0]?.url ?? ''} />
-        <PostList albumId={album.id} />
-      </div>
-      <div className="mt-4">
+        <AlbumPageClient {...sharedProps} />
       </div>
     </>
   );

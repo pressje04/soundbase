@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react';
 import PostItem from './PostItem';
 
-export default function PostList({ albumId }: { albumId: string }) {
+export default function PostList({
+  albumId,
+  newPost,
+}: {
+  albumId: string;
+  newPost?: any;
+}) {
   const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -15,16 +21,26 @@ export default function PostList({ albumId }: { albumId: string }) {
     fetchPosts();
   }, [albumId]);
 
+  // Add new post to top if one is passed in
+  useEffect(() => {
+    if (newPost) {
+      setPosts((prev) => [newPost, ...prev]);
+    }
+  }, [newPost]);
+
+  const handleDelete = (id: string) => {
+    setPosts((prev) => prev.filter((post) => post.id !== id));
+  };
+
   if (posts.length === 0) {
-    return <p className="text-gray-400 mt-6">No reviews or comments yet.</p>;
+    return <p className="text-gray-400 mt-6">No reviews or comments yet... Wanna be the first?</p>;
   }
 
   return (
     <div className="mt-8 mb-24 space-y-6">
       {posts.map((post) => (
-        <PostItem key={post.id} post={post} />
+        <PostItem key={post.id} post={post} onDelete={handleDelete} />
       ))}
     </div>
-    
   );
 }

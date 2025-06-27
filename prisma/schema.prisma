@@ -115,13 +115,15 @@ model Post {
   albumName   String
   artistName  String
   imageUrl    String
-  rating      Int?      // Only defined for reviews
+  rating      Float?      // Only defined for reviews
   comment     String?   // Used for both comments and reviews
   parentId    String?   // If this is a reply, link to parent Post
   parent      Post?     @relation("PostReplies", fields: [parentId], references: [id])
   replies     Post[]    @relation("PostReplies")
   isReview    Boolean   @default(false)
   createdAt   DateTime  @default(now())
+
+  trackRanking Json?
 
   likes Like[]
   reposts Repost[]

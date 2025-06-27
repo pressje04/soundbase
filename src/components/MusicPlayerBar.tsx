@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
+import {Play, Pause, SkipForward, SkipBack} from 'lucide-react';
 
 declare global {
   interface Window {
@@ -45,16 +46,16 @@ export default function MusicPlayerBar() {
   const setDeviceId = useSpotifyPlayerStore((state) => state.setDeviceId);
   const setIsConnected = useSpotifyPlayerStore((state) => state.setIsConnected);
 
-  const [status, setStatus] = useState('Connecting Spotify Web Player...');
+  const [shouldRender, setShouldRender] = useState(false);
   const [playerInstance, setPlayerInstance] = useState<any>(null);
   const [track, setTrack] = useState<any>(null);
   const [paused, setPaused] = useState(true);
 
   useEffect(() => {
     if (window.Spotify && window.onSpotifyWebPlaybackSDKReady) {
-        window.onSpotifyWebPlaybackSDKReady();
-        return;
-    };
+      window.onSpotifyWebPlaybackSDKReady();
+      return;
+    }
 
     const script = document.createElement('script');
     script.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -66,8 +67,8 @@ export default function MusicPlayerBar() {
       if (!token) {
         token = await refreshSpotifyToken();
         if (!token) {
-          setStatus('Login to Spotify Premium to enable playback.');
-          return;
+          console.warn('Spotify token unavailable. Skipping player render.');
+          return; // Do not render anything
         }
       }
 
@@ -82,7 +83,7 @@ export default function MusicPlayerBar() {
         setDeviceId(device_id);
         setIsConnected(true);
         setPlayerInstance(player);
-        setStatus('');
+        setShouldRender(true);
       });
 
       player.addListener('player_state_changed', (state: any) => {
@@ -91,79 +92,74 @@ export default function MusicPlayerBar() {
         setPaused(state.paused);
       });
 
-      player.addListener('initialization_error', ({ message }: { message: string }) => {
-        console.error('Initialization Error:', message);
-        setStatus('Initialization error.');
+      player.addListener('initialization_error', (e: { message: string }) => {
+        console.error('Init error:', e.message);
       });
-
-      player.addListener('authentication_error', ({ message }: { message: string }) => {
-        console.error('Authentication Error:', message);
-        setStatus('Authentication error. Try re-logging in.');
+      
+      player.addListener('authentication_error', (e: { message: string }) => {
+        console.warn('Auth error:', e.message);
       });
-
-      player.addListener('account_error', ({ message }: { message: string }) => {
-        console.error('Account Error:', message);
-        setStatus('Spotify Premium required for playback.');
+      
+      player.addListener('account_error', (e: { message: string }) => {
+        console.warn('Account error:', e.message);
       });
-
-      player.addListener('playback_error', ({ message }: { message: string }) => {
-        console.error('Playback Error:', message);
-        setStatus('Playback error occurred.');
+      
+      player.addListener('playback_error', (e: { message: string }) => {
+        console.warn('Playback error:', e.message);
       });
+      
 
       player.connect();
     };
   }, [setDeviceId, setIsConnected]);
 
   const handlePlayPause = () => {
-    if (playerInstance) {
-      playerInstance.togglePlay();
-    }
+    if (playerInstance) playerInstance.togglePlay();
   };
 
   const handleSkipNext = () => {
-    if (playerInstance) {
-      playerInstance.nextTrack();
-    }
+    if (playerInstance) playerInstance.nextTrack();
   };
 
   const handleSkipPrev = () => {
-    if (playerInstance) {
-      playerInstance.previousTrack();
-    }
+    if (playerInstance) playerInstance.previousTrack();
   };
+
+  if (!shouldRender) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black text-white p-4 z-50 flex justify-between items-center px-6">
-      {status ? (
-        <div>{status}</div>
-      ) : (
-        <>
-          <div className="flex items-center gap-4">
-            {track?.album?.images?.[0]?.url && (
-              <img
-                src={track.album.images[0].url}
-                alt="Album Art"
-                className="w-12 h-12 rounded shadow"
-              />
-            )}
-            <div>
-              <div className="font-semibold">{track?.name}</div>
-              <div className="text-sm text-gray-400">
-                {track?.artists?.map((artist: any) => artist.name).join(', ')}
-              </div>
-            </div>
+      <div className="flex items-center gap-4">
+        {track?.album?.images?.[0]?.url && (
+          <img
+            src={track.album.images[0].url}
+            alt="Album Art"
+            className="w-12 h-12 rounded shadow"
+          />
+        )}
+        <div>
+          <div className="font-semibold">{track?.name}</div>
+          <div className="text-sm text-gray-400">
+            {track?.artists?.map((artist: any) => artist.name).join(', ')}
           </div>
+        </div>
+      </div>
 
-          <div className="flex items-center text-3xl gap-6">
-            <button onClick={handleSkipPrev}>⏮</button>
-            <button onClick={handlePlayPause}>
-              {paused ? '▶️' : '⏸'}
+      <div className="flex items-center text-3xl gap-6">
+        <button onClick={handleSkipPrev}>
+          <SkipBack className="w-6 h-6"/>
+        </button>
+        <button onClick={handlePlayPause}>
+          {paused ? (
+            <Play className="w-6 h-6"/>
+          ) : (
+            <Pause className="w-6 h-6"/>
+          )}
             </button>
-            <button onClick={handleSkipNext}>⏭</button>
-          </div>
-        </>
-      )}
+        <button onClick={handleSkipNext}>
+          <SkipForward className="w-6 h-6"/>
+        </button>
+      </div>
     </div>
   );
 }

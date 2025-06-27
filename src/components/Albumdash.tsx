@@ -12,84 +12,69 @@ type Props = {
   artistName: string;
   releaseYear: string;
   imageUrl: string;
+  tracklist: {id: string; name: string}[];
+  onPostSubmit?: (post: any) => void;
 };
 
-export default function AlbumReviewSection({
-  albumId,
-  albumName,
-  artistName,
-  releaseYear,
-  imageUrl,
-}: Props) {
+export default function Albumdash(props: Props) {
   const [showForm, setShowForm] = useState(false);
-  const [reviews, setReviews] = useState<{ rating: number; comment: string }[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const { user } = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchReviews() {
-      try {
-        const res = await fetch(`/api/reviews?albumId=${albumId}`);
-        const data = await res.json();
-        setReviews(data || []);
-      } catch (error) {
-        console.error('Failed to load reviews:', error);
-      }
-    }
+  const fetchReviews = async () => {
+    const res = await fetch(`/api/reviews?albumId=${props.albumId}&_=${Date.now()}`, {
+      cache: 'no-store',
+    });
+    const data = await res.json();
+    setReviews(data || []);
+  };
 
+  useEffect(() => {
     fetchReviews();
-  }, [albumId]);
+  }, [props.albumId]);
 
   const handleReviewSubmit = async ({
     score,
     text,
-    albumName,
-    artistName,
-    releaseYear,
-    imageUrl,
     isReview,
+    trackRanking,
   }: {
     score: number;
     text: string;
-    albumName: string;
-    artistName: string;
-    releaseYear: string;
-    imageUrl: string;
     isReview: boolean;
+    trackRanking?: string[];
   }) => {
-    if (!user) {
-      router.push('/signup');
-      return;
-    }
+    if (!user) return router.push('/signup');
 
-    try {
-      const res = await fetch('/api/posts/new', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          albumId,
-          albumName,
-          artistName,
-          imageUrl,
-          rating: score,
-          comment: text,        // ✅ Use correct field name
-          isReview,             // ✅ Ensure this is set to true
-        }),
-      });
+    const res = await fetch('/api/posts/new', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        albumId: props.albumId,
+        albumName: props.albumName,
+        artistName: props.artistName,
+        imageUrl: props.imageUrl,
+        rating: score,
+        comment: text,
+        isReview,
+        parentId: null,
+        trackRanking,
+      }),
+    });
 
-      if (res.ok) {
-        const newReview = await res.json();
-        setReviews((prev) => [...prev, newReview]);
-      } else {
-        const error = await res.json();
-        console.error('Error submitting review:', error);
-      }
-    } catch (err) {
-      console.error('Error:', err);
+    if (res.ok) {
+      const createdPost = await res.json();
+      const fullPostRes = await fetch(`/api/posts/${createdPost.id}`);
+      const fullPost = await fullPostRes.json();
+
+      await fetchReviews();
+      setReviews((prev) => [fullPost, ...prev]);
+      props.onPostSubmit?.(fullPost);
     }
   };
 
-  const averageRating =
+  const avgRating =
     reviews.length > 0
       ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
       : null;
@@ -97,7 +82,7 @@ export default function AlbumReviewSection({
   return (
     <div className="mt-8">
       <div className="flex items-center gap-4">
-        <ScorePill score={averageRating} />
+        <ScorePill score={avgRating} />
         <button
           onClick={() => setShowForm(true)}
           className="text-xl px-4 py-2 text-white font-bold border border-white rounded hover:bg-white hover:text-black transition"
@@ -110,11 +95,12 @@ export default function AlbumReviewSection({
         <ReviewForm
           userId={user?.id || null}
           onClose={() => setShowForm(false)}
-          onSubmit={handleReviewSubmit}
-          albumName={albumName}
-          artistName={artistName}
-          releaseYear={releaseYear}
-          imageUrl={imageUrl}
+          onSubmit={({ score, text, trackRanking }) => handleReviewSubmit({ score, text, isReview: true, trackRanking })}
+          albumName={props.albumName}
+          artistName={props.artistName}
+          releaseYear={props.releaseYear}
+          imageUrl={props.imageUrl}
+          tracklist={props.tracklist}
         />
       )}
     </div>

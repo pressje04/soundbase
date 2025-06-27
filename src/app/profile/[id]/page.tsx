@@ -7,46 +7,34 @@ import ProfileHeader from "@/components/ProfileHeader";
 import Navbar from "@/components/navbar";
 import FavAlbumProf from "@/components/FavAlbumProf";
 import FollowModal from '@/components/FollowModal';
-import ReviewList from '@/components/ReviewList';
-import ScorePill from '@/components/ScorePill';
+import ProfileTabs from '@/components/ProfileTabs';
+import UserActivityFeed from '@/components/ProfileFeed';
 
-type ReviewedAlbum = {
-  albumId: string;
-  albumName: string;
-  artistName: string;
-  imageUrl: string;
-  rating: number;
-};
-
-export default function ProfilePage({ params }: { params: Promise<{id: string}> }) {
+export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useUser();
-  const {id: profileUserId} = use(params);
+  const { id: profileUserId } = use(params);
 
   const isOwnProfile = user?.id === profileUserId;
   const [profileData, setProfileData] = useState<any | null>(null);
   const [favoriteAlbum, setFavoriteAlbum] = useState<any | null>(null);
-
-  //This is for displaying follower/following modals of users
   const [showFollowers, setShowFollowers] = useState(false);
   const [showFollowing, setShowFollowing] = useState(false);
-
-  //For album review display
-  const [albums, setAlbums] = useState<ReviewedAlbum[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'Posts' | 'Likes'>('Posts');
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     const formData = new FormData();
     formData.append('avatar', file);
-  
+
     const res = await fetch('/api/user/avatar', {
       method: 'POST',
       body: formData,
     });
-  
+
     if (res.ok) {
       const updated = await res.json();
       setProfileData((prev: any) => ({ ...prev, image: updated.image }));
@@ -55,35 +43,27 @@ export default function ProfilePage({ params }: { params: Promise<{id: string}> 
     }
   };
 
-  // Fetch profile data (for both self and others)
   useEffect(() => {
     async function fetchProfile() {
       try {
         const res = await fetch(`/api/user?id=${profileUserId}`);
-        if (!res.ok) throw new Error("Failed to fetch profile");
         const data = await res.json();
         setProfileData(data);
       } catch (err) {
         console.error("Error fetching profile data:", err);
       }
     }
-
     fetchProfile();
   }, [profileUserId]);
 
-  // Fetch reviews and determine favorite album
   useEffect(() => {
-    async function fetchReviewsAndAlbum() {
+    async function fetchFavoriteAlbum() {
       try {
         const reviewRes = await fetch(`/api/reviews/user?id=${profileUserId}`);
         const reviews = await reviewRes.json();
-
         if (reviews.length === 0) return;
 
-        const fav = reviews.reduce((max: any, r: any) =>
-          r.rating > max.rating ? r : max,
-          reviews[0]
-        );
+        const fav = reviews.reduce((max: any, r: any) => r.rating > max.rating ? r : max, reviews[0]);
 
         const tokenRes = await fetch('https://accounts.spotify.com/api/token', {
           method: 'POST',
@@ -117,24 +97,59 @@ export default function ProfilePage({ params }: { params: Promise<{id: string}> 
         console.error("Failed to load favorite album:", err);
       }
     }
-
-    fetchReviewsAndAlbum();
+    fetchFavoriteAlbum();
   }, [profileUserId]);
 
-  // Fetch all reviewed albums
   useEffect(() => {
-    async function fetchAlbums() {
+    async function fetchTabPosts() {
       try {
-        const res = await fetch(`/api/reviews/user?id=${profileUserId}`);
+        const res = await fetch(`/api/user/${profileUserId}/${activeTab.toLowerCase()}`);
         const data = await res.json();
-        setAlbums(data || []);
-        setLoading(false);
+        // If needed: setPosts(data || []);
       } catch (err) {
-        console.error("Failed to fetch albums:", err);
+        console.error(`Failed to fetch ${activeTab.toLowerCase()} posts:`, err);
       }
     }
-    fetchAlbums();
-  }, [profileUserId]);
+    fetchTabPosts();
+  }, [profileUserId, activeTab]);
+
+  useEffect(() => {
+    if (!user || !profileData) return;
+    const alreadyFollowing = profileData.followers?.some((f: any) => f.followerId === user.id);
+    setIsFollowing(alreadyFollowing);
+  }, [profileData, user]);
+
+  const handleFollowToggle = async () => {
+    if (!user) return;
+
+    const payload = {
+      followerId: user.id,
+      followingId: profileUserId,
+    };
+
+    const res = await fetch('/api/follow', {
+      method: isFollowing ? 'DELETE' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      setIsFollowing(!isFollowing);
+
+      // Optimistically update UI
+      setProfileData((prev: any) => {
+        if (!prev) return prev;
+
+        const updatedFollowers = isFollowing
+          ? prev.followers.filter((f: any) => f.followerId !== user.id)
+          : [...prev.followers, { followerId: user.id, follower: user }];
+
+        return { ...prev, followers: updatedFollowers };
+      });
+    } else {
+      console.error('Follow/unfollow failed:', await res.json());
+    }
+  };
 
   if (!profileData) {
     return (
@@ -166,13 +181,11 @@ export default function ProfilePage({ params }: { params: Promise<{id: string}> 
         <ProfileHeader
           name={profileData.firstName}
           createdAt={profileData.createdAt}
-          favoriteAlbum={favoriteAlbum}
           followerCount={followerCount}
           followingCount={followingCount}
           onFollowersClick={() => setShowFollowers(true)}
           onFollowingClick={() => setShowFollowing(true)}
           image={profileData.image}
-          //If it's not your profile, u can't change the pfp
           onAvatarClick={isOwnProfile ? () => fileInputRef.current?.click() : undefined}
         />
 
@@ -186,12 +199,18 @@ export default function ProfilePage({ params }: { params: Promise<{id: string}> 
           />
         )}
 
-
-        {!isOwnProfile && (
+        {/* Correct placement: follow button not tied to favorite album */}
+        {user && !isOwnProfile && (
           <div className="mt-4">
-            {/* Future follow/unfollow button goes here */}
-            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-              Follow
+            <button
+              className={`px-4 py-2 rounded ${
+                isFollowing
+                  ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+              }`}
+              onClick={handleFollowToggle}
+            >
+              {isFollowing ? 'Unfollow' : 'Follow'}
             </button>
           </div>
         )}
@@ -210,31 +229,11 @@ export default function ProfilePage({ params }: { params: Promise<{id: string}> 
           </div>
         )}
 
-<h2 className="text-2xl mt-12 text-center font-semibold mb-4">
-  {isOwnProfile ? "Your Reviews" : `${profileData.firstName}'s Reviews`}
-</h2>
+        <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-6 px-6 pb-24">
-  {albums.map((album) => (
-    <div key={album.albumId} className="bg-zinc-900 rounded-lg shadow p-4">
-      <img
-        src={album.imageUrl}
-        alt={album.albumName}
-        className="w-full h-48 object-cover rounded"
-      />
-      <div className="text-center">
-      <h3 className="text-white mt-2 font-semibold">{album.albumName}</h3>
-      <p className="text-sm text-gray-400">{album.artistName}</p>
-      <div className="mt-4">
-      <ScorePill size='lg' score={album.rating} />
-      </div>
-      </div>
-    </div>
-  ))}
-</div>
-
-
-        
+        <div className="mt-6 w-full">
+          <UserActivityFeed userId={profileUserId} type={activeTab} />
+        </div>
       </div>
     </>
   );

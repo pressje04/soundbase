@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { getCurrentUser } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -11,6 +13,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing albumId' }, { status: 400 });
   }
 
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  const currentUser = getCurrentUser();
+
   const posts = await prisma.post.findMany({
     where: { albumId, parentId: null },
     orderBy: { createdAt: 'desc' },
@@ -18,13 +24,32 @@ export async function GET(req: NextRequest) {
       user: true,
       replies: {
         include: { user: true },
-        orderBy: { createdAt: 'asc' }
+        orderBy: { createdAt: 'asc' },
       },
+      likes: currentUser
+        ? {
+            where: { userId: currentUser.id },
+            select: { id: true },
+          }
+        : false,
+      reposts: currentUser
+        ? {
+            where: { userId: currentUser.id },
+            select: { id: true },
+          }
+        : false,
       _count: {
         select: { replies: true, likes: true, reposts: true },
       },
     },
   });
 
-  return NextResponse.json(posts);
+  // Add flags: likedByCurrentUser and repostedByCurrentUser
+  const enrichedPosts = posts.map((post) => ({
+    ...post,
+    likedByCurrentUser: currentUser ? post.likes?.length > 0 : false,
+    repostedByCurrentUser: currentUser ? post.reposts?.length > 0 : false,
+  }));
+
+  return NextResponse.json(enrichedPosts);
 }

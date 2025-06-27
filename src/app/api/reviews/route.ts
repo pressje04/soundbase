@@ -41,23 +41,32 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const albumId = searchParams.get('albumId');
+  const albumId = req.nextUrl.searchParams.get('albumId');
 
   if (!albumId) {
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json({ error: 'Missing albumId' }, { status: 400 });
   }
 
   try {
-    const reviews = await prisma.review.findMany({
-      where: { albumId },
-      orderBy: { createdAt: 'desc' },
-      include: { user: true }, // if you want to show reviewer name
+    const reviews = await prisma.post.findMany({
+      where: {
+        albumId,
+        isReview: true,
+        rating: {
+          not: null,
+        },
+      },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json(reviews);
-  } catch (err) {
-    console.error('Failed to fetch reviews:', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    console.error('Failed to fetch reviews:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

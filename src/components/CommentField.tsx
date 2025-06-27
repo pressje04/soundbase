@@ -11,7 +11,7 @@ type Props = {
   artistName: string;
   releaseYear: string;
   imageUrl: string;
-  onCommentPosted?: () => void; // optional callback to refresh post list
+  onCommentPosted?: (post: any) => void; // optional callback to refresh post list
 };
 
 export default function CommentComposer({
@@ -55,7 +55,12 @@ export default function CommentComposer({
     setIsSubmitting(false);
     setText('');
 
-    if (res.ok && onCommentPosted) onCommentPosted();
+    if (res.ok && onCommentPosted){
+      const newPost = await res.json();
+      const full = await fetch(`/api/posts/${newPost.id}`);
+      const fullPost = await full.json();
+      onCommentPosted(fullPost);
+    }
   };
 
   return (

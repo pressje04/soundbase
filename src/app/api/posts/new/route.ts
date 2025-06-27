@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { albumId, albumName, artistName, imageUrl, rating, comment, isReview, parentId } = await req.json();
+  const { albumId, albumName, artistName, imageUrl, rating, comment, isReview, parentId, trackRanking } = await req.json();
 
   if (!albumId || !comment) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -29,7 +29,11 @@ export async function POST(req: NextRequest) {
       comment,
       isReview,
       parentId: parentId ?? null,
+      trackRanking,
     },
+    include: {
+      user: true,
+    }
   });
 
   return NextResponse.json(post);
