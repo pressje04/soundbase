@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import { nanoid } from 'nanoid';
-import { getCurrentUser } from '@/lib/auth'; // make sure this exists and returns the logged-in user
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { getCurrentUser } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -13,6 +12,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const supabase = createRouteHandlerClient({ cookies });
+
   const formData = await req.formData();
   const file = formData.get('avatar') as File;
 
@@ -20,15 +21,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid image upload' }, { status: 400 });
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const fileExt = file.name.split('.').pop();
+  const filePath = `pfps/${user.id}.${fileExt}`;
 
-  const fileName = `${nanoid()}-${file.name}`;
-  const filePath = path.join(process.cwd(), 'public/uploads', fileName);
+  const { error: uploadError } = await supabase.storage
+    .from('pfps')
+    .upload(filePath, file, { upsert: true });
 
-  await writeFile(filePath, buffer);
+  if (uploadError) {
+    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  }
 
-  const imageUrl = `/uploads/${fileName}`;
+  const { data: urlData } = supabase.storage.from('pfps').getPublicUrl(filePath);
+  const imageUrl = urlData?.publicUrl;
 
   await prisma.user.update({
     where: { id: user.id },

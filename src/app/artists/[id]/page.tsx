@@ -136,7 +136,7 @@ const mostPopularAlbum = albumsWithPopularity.reduce((top: any, current: any) =>
         )}
       </div>
       {mostPopularAlbum && (
-  <div className="mt-10">
+  <div className="px-6 mt-10">
     <h2 className="text-2xl font-semibold mb-4">Most Popular Album</h2>
     <Link href={`/albums/${mostPopularAlbum.id}`}>
       <div className="flex items-center gap-6 p-4 rounded hover:bg-gray-700 transition">
