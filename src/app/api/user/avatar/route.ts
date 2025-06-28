@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { getCurrentUser } from '@/lib/auth';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET!;
+const SUPABASE_PROJECT_URL = process.env.SUPABASE_PROJECT_URL!;
+const SUPABASE_BUCKET = 'pfps';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // @ts-expect-error - sync access is fine here
+  const token = cookies().get('token')?.value;
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const supabase = createRouteHandlerClient({ cookies });
+  let userId: string;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    userId = decoded.userId as string;
+  } catch (err) {
+    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  }
 
   const formData = await req.formData();
   const file = formData.get('avatar') as File;
@@ -21,24 +29,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid image upload' }, { status: 400 });
   }
 
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
   const fileExt = file.name.split('.').pop();
-  const filePath = `pfps/${user.id}.${fileExt}`;
+  const filePath = `${SUPABASE_BUCKET}/${userId}.${fileExt}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from('pfps')
-    .upload(filePath, file, { upsert: true });
-
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
-  }
-
-  const { data: urlData } = supabase.storage.from('pfps').getPublicUrl(filePath);
-  const imageUrl = urlData?.publicUrl;
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { image: imageUrl },
+  // Upload directly to Supabase Storage REST API
+  const uploadRes = await fetch(`${SUPABASE_PROJECT_URL}/storage/v1/object/${filePath}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': file.type,
+    },
+    body: buffer,
   });
 
-  return NextResponse.json({ image: imageUrl });
+  if (!uploadRes.ok) {
+    const text = await uploadRes.text();
+    return NextResponse.json({ error: `Upload failed: ${text}` }, { status: 500 });
+  }
+
+  const publicUrl = `${SUPABASE_PROJECT_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${userId}.${fileExt}`;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { image: publicUrl },
+  });
+
+  return NextResponse.json({ image: publicUrl });
 }

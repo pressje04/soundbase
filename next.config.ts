@@ -5,10 +5,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'i.scdn.co',
+        hostname: 'i.scdn.co', // Spotify
+      },
+      {
+        protocol: 'https',
+        hostname: 'trddkrtwxykzrjzrgrex.supabase.co', // Supabase
+        pathname: '/storage/v1/object/public/**',
       },
     ],
-  }
+  },
 };
 
 export default nextConfig;
