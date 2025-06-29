@@ -132,6 +132,9 @@ export default function PostItem({
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white">
                 {post.user?.firstName ?? 'Anonymous'}
+                <span className="ps-2 font-semibold text-gray-500">
+                  @{post.user?.username ?? '@anonymous'}
+                </span>
               </span>
               {post.isReview && (
                 <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
