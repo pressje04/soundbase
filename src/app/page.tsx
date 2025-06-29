@@ -10,7 +10,7 @@ import SuggestedUserScroll from '@/components/SuggestedUserScroll';
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
   const [topAlbums, setTopAlbums] = useState<any[]>([]);
-  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
   const {user, loading} = useUser(); // Custom hook to see if user is logged in
 
   useEffect(() => {
@@ -42,18 +42,26 @@ export default function Page() {
     fetchTopAlbums();
   }, []);
 
-  useEffect(() => {
-    async function fetchSuggested() {
-      try {
-        const res = await fetch('/api/suggested');
-        const users = await res.json();
-        setSuggestedUsers(users);
-      } catch (err) {
-        console.error('Failed to get suggested users:', err);
+useEffect(() => {
+  async function fetchSuggestedUsers() {
+    if (!user?.id) return;
+
+    try {
+      const res = await fetch(`/api/suggested?userId=${user.id}`);
+      if (!res.ok) {
+        console.error("Failed to fetch suggested users:", await res.json());
+        return;
       }
+      const data = await res.json();
+      setSuggestedUsers(data);
+    } catch (err) {
+      console.error("Error fetching suggested users:", err);
     }
-    fetchSuggested();
-  }, []);
+  }
+
+  fetchSuggestedUsers();
+}, [user]);
+
   
 
   return (
