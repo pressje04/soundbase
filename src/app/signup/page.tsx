@@ -9,33 +9,23 @@ export default function SignupPage() {
   const [form, setForm] = useState({
     identifier: "",
     firstName: "",
+    username: "",
     password: "",
     confirmPassword: ""
   });
 
-  // This is for when the text field becomes red if a user enters something incorrectly
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
-  const [hasSubmitted, setHasSubmitted] = useState(false); // Track if user has submitted
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const router = useRouter();
 
-  /* Handles entering/deleting text from a field, really important for 
-     react i/o
-
-     params: React.ChangeEvent<HTMLInputElement> ==> essentially the element being changed
-  */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* This handles a user submitting signup info to our app.
-     If it fails for whatever reason (which it shouldn't even 
-     if user entered/omitted info) it redirects back to signup page.
-  */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setHasSubmitted(true); // Enable red border check
+    setHasSubmitted(true);
 
-    // Send a request to our custom signup API
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -57,7 +47,6 @@ export default function SignupPage() {
 
   return (
     <div className="flex flex-col items-center mt-10">
-      {/* Logo - above the form */}
       <div className="mb-6">
         <Image
           src="/images/logo.png"
@@ -68,93 +57,55 @@ export default function SignupPage() {
         />
       </div>
 
-      {/* Signup form with border */}
       <div className="w-full max-w-md p-6 rounded-lg bg-black bg-opacity-60">
         <h1 className="text-2xl font-bold mb-16 text-white text-center">Sign Up For Soundbase</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Identifier field */}
-          <input
-            type="text"
+          <InputField
             name="identifier"
             placeholder="Email or phone number"
             value={form.identifier}
             onChange={handleChange}
-            autoComplete="off"
-            className={`w-full px-4 py-2 rounded bg-black text-white
-              transition-all duration-350 ease-in-out
-              focus:outline-none
-              ${hasSubmitted && fieldErrors.identifier
-                ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
-                : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
-            `}
-            style={{
-              WebkitBoxShadow: '0 0 0px 1000px #000 inset',
-              WebkitTextFillColor: 'white',
-            }}
+            hasError={hasSubmitted && !!fieldErrors.identifier}
           />
 
-          {/*First Name Field */}
-          <input
-            type="text"
+          {/* First name */}
+          <InputField
             name="firstName"
             placeholder="First Name"
-            autoComplete="new-password"
             value={form.firstName}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded bg-black text-white
-              transition-all duration-350 ease-in-out
-              focus:outline-none
-              ${hasSubmitted && fieldErrors.firstName
-                ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
-                : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
-            `}
-            style={{
-              WebkitBoxShadow: '0 0 0px 1000px #000 inset',
-              WebkitTextFillColor: 'white',
-            }}
+            hasError={hasSubmitted && !!fieldErrors.firstName}
           />
 
-          {/* Password field */}
-          <input
-            type="password"
+          {/* Username */}
+          <InputField
+            name="username"
+            placeholder="Username"
+            value={form.username}
+            onChange={handleChange}
+            hasError={hasSubmitted && !!fieldErrors.username}
+          />
+
+          {/* Password */}
+          <InputField
             name="password"
             placeholder="Password"
-            autoComplete="new-password"
+            type="password"
             value={form.password}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded bg-black text-white
-              transition-all duration-350 ease-in-out
-              focus:outline-none
-              ${hasSubmitted && fieldErrors.password
-                ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
-                : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
-            `}
-            style={{
-              WebkitBoxShadow: '0 0 0px 1000px #000 inset',
-              WebkitTextFillColor: 'white',
-            }}
+            hasError={hasSubmitted && !!fieldErrors.password}
           />
 
-          {/* Confirm password field */}
-          <input
-            type="password"
+          {/* Confirm Password */}
+          <InputField
             name="confirmPassword"
             placeholder="Confirm Password"
-            autoComplete="new-password"
+            type="password"
             value={form.confirmPassword}
             onChange={handleChange}
-            className={`w-full px-4 py-2 rounded bg-black text-white
-              transition-all duration-350 ease-in-out
-              focus:outline-none
-              ${hasSubmitted && fieldErrors.confirmPassword
-                ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
-                : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'}
-            `}
-            style={{
-              WebkitBoxShadow: '0 0 0px 1000px #000 inset',
-              WebkitTextFillColor: 'white',
-            }}
+            hasError={hasSubmitted && !!fieldErrors.confirmPassword}
           />
 
           <button
@@ -164,40 +115,73 @@ export default function SignupPage() {
             Sign Up
           </button>
 
-          {/* Display all field errors together at bottom */}
+          {/* Error messages */}
           {Object.values(fieldErrors).length > 0 && (
             <div className="mt-4 space-y-1">
-              {Object.values(fieldErrors).map((errorMsg, idx) => (
-                <p key={idx} className="text-red-500 text-sm text-center">
-                  {errorMsg}
-                </p>
+              {Object.values(fieldErrors).map((msg, idx) => (
+                <p key={idx} className="text-red-500 text-sm text-center">{msg}</p>
               ))}
             </div>
           )}
         </form>
+
         <button
-            type="button"
-            onClick={() => signIn('google')}
-            className="w-full mt-4 p-0 bg-transparent border-none"
+          type="button"
+          onClick={() => signIn('google')}
+          className="w-full mt-4 p-0 bg-transparent border-none"
         >
-        <img
+          <img
             src="/images/light/google_signup.png"
             alt="Sign up with Google"
             className="mt-4 max-h-10 w-auto mx-auto block"
-        />
-        <h3 className='mt-8 mb-8'>OR</h3>
+          />
+          <h3 className='mt-8 mb-8'>OR</h3>
         </button>
 
-
-
         <p className="mt-4 text-sm text-center text-white">
-            Already have an account?{' '}
-            <a href="/login"
-            className="text-blue-400 hover:text-blue-300 hover:underline transition"
-            >Log in here
-            </a>
+          Already have an account?{' '}
+          <a href="/login" className="text-blue-400 hover:text-blue-300 hover:underline transition">
+            Log in here
+          </a>
         </p>
       </div>
     </div>
+  );
+}
+
+//DRY helper component for inputs
+function InputField({
+  name,
+  placeholder,
+  value,
+  onChange,
+  type = "text",
+  hasError,
+}: {
+  name: string;
+  placeholder: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  type?: string;
+  hasError: boolean;
+}) {
+  return (
+    <input
+      type={type}
+      name={name}
+      placeholder={placeholder}
+      autoComplete="new-password"
+      value={value}
+      onChange={onChange}
+      className={`w-full px-4 py-2 rounded bg-black text-white transition-all duration-350 ease-in-out focus:outline-none ${
+        hasError
+          ? 'border border-red-500 focus:border-red-500 focus:ring-red-500 ring-1'
+          : 'border border-gray-300 focus:border-blue-500 focus:ring-blue-500 ring-0'
+      }`}
+      style={{
+        WebkitBoxShadow: '0 0 0px 1000px #000 inset',
+        WebkitTextFillColor: 'white',
+      }}
+    />
   );
 }
