@@ -3,23 +3,25 @@
 import { useEffect, useState } from 'react';
 import PostItem from './PostItem';
 
-export default function PostList({
-  albumId,
-  newPost,
-}: {
-  albumId: string;
+type PostListProps = {
+  albumId?: string;
   newPost?: any;
-}) {
+  endpoint?: string; // New prop
+};
+
+export default function PostList({ albumId, newPost, endpoint }: PostListProps) {
   const [posts, setPosts] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchPosts() {
-      const res = await fetch(`/api/posts?albumId=${albumId}`);
+      const url = endpoint ?? `/api/posts?albumId=${albumId}`;
+      const res = await fetch(url);
       const data = await res.json();
       setPosts(data);
     }
+
     fetchPosts();
-  }, [albumId]);
+  }, [albumId, endpoint]);
 
   // Add new post to top if one is passed in
   useEffect(() => {
@@ -39,8 +41,7 @@ export default function PostList({
   return (
     <div className="mt-8 mb-24 space-y-6 px-4">
       {posts.map((post) => (
-        <div key={post.id} 
-          className="w-full max-w-screen-sm mx-auto overflow-hidden">
+        <div key={post.id} className="w-full max-w-screen-sm mx-auto overflow-hidden">
           <PostItem post={post} onDelete={handleDelete} />
         </div>
       ))}

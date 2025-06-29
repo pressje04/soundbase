@@ -66,6 +66,14 @@ export default function HamburgerMenu() {
     Discover
   </Link>
 
+  {user && (
+  <Link
+    href={`/feed`}
+    className="block text-white px-4 py-2 rounded hover:bg-zinc-800"
+  >
+    Feed
+  </Link>
+)}
           {user && (
   <Link
     href={`/profile/${user.id}`}
