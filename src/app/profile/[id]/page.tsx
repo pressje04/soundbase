@@ -187,6 +187,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
           onFollowingClick={() => setShowFollowing(true)}
           image={profileData.image}
           onAvatarClick={isOwnProfile ? () => fileInputRef.current?.click() : undefined}
+          username={profileData.username}
         />
 
         {isOwnProfile && (

@@ -9,6 +9,7 @@ export default function ProfileHeader({
   onFollowingClick,
   image,
   onAvatarClick,
+  username,
 }: {
   name: string;
   createdAt: string;
@@ -18,6 +19,7 @@ export default function ProfileHeader({
   onFollowingClick?: () => void;
   image?: string;
   onAvatarClick?: () => void;
+  username: string;
 }) {
   return (
     <div className="w-full items-center flex flex-col sm:flex-row gap-6 sm:items-start mb-8">
@@ -37,6 +39,7 @@ export default function ProfileHeader({
       {/* User Info */}
       <div className="flex-1">
         <h1 className="text-2xl font-bold text-white">{name}</h1>
+        <h2 className="text-lg text-gray-500">@{username}</h2>
         <p className="text-sm text-gray-400 mb-2">
           Joined {new Date(createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}
         </p>
