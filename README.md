@@ -25,7 +25,7 @@ Soundbase is a full-stack social music platform where users can discover, review
 
 - 🔐 **Secure Auth**: Sign in via Google OAuth with JWT-based session handling  
 - 📀 **Dynamic Album Pages**: Pull album metadata via Spotify API and render song lists, cover art, and more  
-- ⭐ **Album Reviews**: Leave detailed reviews with a scroll-based rating pill component  
+- ⭐ **Album Reviews**: Leave detailed reviews with a scroll-based rating pill component and optionally rank tracks
 - 💬 **Comments & Threads**: Interact with reviews via threaded comments, replies, and discussion posts  
 - ❤️ **Engagement Tools**: Like, repost, comment, and track view counts on posts
 - 📷 **Listening Sessions**: Listen to music in real time with friends
