@@ -10,6 +10,8 @@ import SuggestedUserScroll from '@/components/SuggestedUserScroll';
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
   const [topAlbums, setTopAlbums] = useState<any[]>([]);
+  const [recentAlbums, setRecentAlbums] = useState<any[]>([]);
+
   const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
   const {user, loading} = useUser(); // Custom hook to see if user is logged in
 
@@ -40,6 +42,21 @@ export default function Page() {
       setTopAlbums(formattedData);
     }
     fetchTopAlbums();
+  }, []);
+
+  useEffect(() => {
+    async function fetchMostRecent() {
+      const res = await fetch(`/api/albums/mostrecent`);
+      const data = await res.json();
+
+      const formattedData = data.map((album: any) => ({
+        id: album.albumId,
+        name: album.albumName,
+        images: [{url: album.imageUrl}],
+      }))
+      setRecentAlbums(formattedData);
+    }
+    fetchMostRecent();
   }, []);
 
 useEffect(() => {
@@ -94,6 +111,13 @@ useEffect(() => {
       {topAlbums.length > 0 && 
       <div className="mt-6 w-full">
         <AlbumScroll albums={topAlbums}/>
+      </div>}
+
+      <h3 className="mt-18 text-4xl font-bold mb-4">Recently Reviewed 🔥</h3>
+      {/* Album Carousel */}
+      {recentAlbums.length > 0 && 
+      <div className="mt-6 w-full">
+        <AlbumScroll albums={recentAlbums}/>
       </div>}
 
       {suggestedUsers.length > 0 && (
