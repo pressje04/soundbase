@@ -5,10 +5,12 @@ import Navbar from "../components/navbar";
 import AlbumScroll from "@/components/albumscroll";
 import useUser from '@/hooks/useUser';
 import Link from 'next/link';
+import SuggestedUserScroll from '@/components/SuggestedUserScroll';
 
 export default function Page() {
   const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
   const [topAlbums, setTopAlbums] = useState<any[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
   const {user, loading} = useUser(); // Custom hook to see if user is logged in
 
   useEffect(() => {
@@ -38,6 +40,19 @@ export default function Page() {
       setTopAlbums(formattedData);
     }
     fetchTopAlbums();
+  }, []);
+
+  useEffect(() => {
+    async function fetchSuggested() {
+      try {
+        const res = await fetch('/api/suggested');
+        const users = await res.json();
+        setSuggestedUsers(users);
+      } catch (err) {
+        console.error('Failed to get suggested users:', err);
+      }
+    }
+    fetchSuggested();
   }, []);
   
 
@@ -73,12 +88,14 @@ export default function Page() {
         <AlbumScroll albums={topAlbums}/>
       </div>}
 
-      <h3 className="mt-12 text-4xl font-bold mb-4">New Releases</h3>
-      {/* Album Carousel */}
-      {albums.length > 0 && 
-      <div className="mt-6 w-full">
-        <AlbumScroll albums={albums}/>
-      </div>}
+      {suggestedUsers.length > 0 && (
+          <>
+            <h3 className="mt-12 text-4xl font-bold mb-4">Suggested Followers</h3>
+            <div className="mt-6 w-full">
+              <SuggestedUserScroll users={suggestedUsers} />
+            </div>
+          </>
+        )}
     </div>
     </>
   );
