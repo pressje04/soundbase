@@ -82,7 +82,7 @@ export default function SearchPage() {
 
       {/* ✅ Tab bar appears only after a search */}
       {hasSearched && (
-        <div className="flex justify-center mb-6 space-x-6 text-lg font-medium border-b border-gray-600">
+        <div className="flex justify-center mb-6 space-x-6 text-lg font-medium">
           {['albums', 'artists', 'users'].map((tab) => (
             <button
               key={tab}

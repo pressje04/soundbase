@@ -21,22 +21,29 @@ export async function GET(_: NextRequest, {params}: {params: {id: string}}) {
     });
 
     const reposts = await prisma.repost.findMany({
-        where: {userId},
-        include: {
-            post: {
-                include: {
-                    user: true,
-                    _count: {select: {likes: true, reposts: true, replies: true}}
-                }
-            }
+      where: { userId },
+      include: {
+        user: true, // ✅ include the reposter (required for repostedBy)
+        post: {
+          include: {
+            user: true, // original author of the post
+            _count: { select: { likes: true, reposts: true, replies: true } },
+          },
         },
-        orderBy: {createdAt: 'desc'}
+      },
+      orderBy: { createdAt: 'desc' },
     });
+    
+    
 
     const repostedPosts = reposts.map((r) => ({
-        ...r.post, 
-        repostedByUser: true
+      ...r.post,
+      repostedBy: {
+        id: r.user.id,
+        username: r.user.username,
+      },
     }));
+    
 
     const all = [...authoredPosts, ...repostedPosts];
     all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

@@ -110,6 +110,13 @@ export default function PostItem({
 
   return (
     <div className="w-full max-w-xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-700 pt-4 pb-6">
+      {post.repostedBy && (
+        <p className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+          <Repeat2 size={16} strokeWidth={2} />
+          @{post.repostedBy.username} reposted
+         </p>
+      )}
+
       <div className="flex items-start gap-4">
         <Link href={`/profile/${post.user?.id}`} className="shrink-0">
           {post.user?.image ? (
