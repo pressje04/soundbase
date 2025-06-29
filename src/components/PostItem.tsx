@@ -23,6 +23,9 @@ export default function PostItem({
     { id: string; name: string; imageUrl: string }[]
   >([]);
 
+  const [expanded, setExpanded] = useState(false);
+  const MAX_LENGTH = 500;
+
   const { user } = useUser();
   const router = useRouter();
   const isAuthor = user?.id === post.userId;
@@ -165,27 +168,42 @@ export default function PostItem({
           </div>
 
           <p className="mt-1 text-gray-300 whitespace-pre-wrap break-words">
-            {post.comment}
-          </p>
+  {post.comment?.length > MAX_LENGTH && !expanded
+    ? `${post.comment.slice(0, MAX_LENGTH)}...`
+    : post.comment}
+</p>
+
+{post.comment?.length > MAX_LENGTH && (
+  <button
+    onClick={() => setExpanded(!expanded)}
+    className="text-blue-400 text-sm hover:underline mt-1"
+  >
+    {expanded ? 'Show less' : 'Read more'}
+  </button>
+)}
+
           <p className="mt-1 text-xs text-gray-500">
             {new Date(post.createdAt).toLocaleString()}
           </p>
 
           {showAlbumInfo && post.albumId && (
-            <div className="mt-3 flex items-center gap-3 mb-3">
-              <img
-                src={post.imageUrl}
-                alt={post.albumName}
-                className="w-12 h-12 rounded object-cover shadow flex-shrink-0"
-              />
-              <div className="truncate">
-                <p className="text-sm font-semibold text-white truncate">
-                  {post.albumName}
-                </p>
-                <p className="text-xs text-gray-400 truncate">{post.artistName}</p>
-              </div>
-            </div>
-          )}
+  <Link href={`/albums/${post.albumId}`} className="block mt-3 mb-3">
+    <div className="flex items-center gap-3 hover:bg-gray-800 p-2 rounded transition">
+      <img
+        src={post.imageUrl}
+        alt={post.albumName}
+        className="w-12 h-12 rounded object-cover shadow flex-shrink-0"
+      />
+      <div className="truncate">
+        <p className="text-sm font-semibold text-white truncate">
+          {post.albumName}
+        </p>
+        <p className="text-xs text-gray-400 truncate">{post.artistName}</p>
+      </div>
+    </div>
+  </Link>
+)}
+
 
           {topTracks.length > 0 && (
             <div className="mt-4 bg-black rounded-xl shadow-md">
