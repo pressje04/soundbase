@@ -9,26 +9,6 @@ import { useState } from 'react';
 import CommentComposer from './CommentField';
 import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
 
-const { deviceId, isConnected } = useSpotifyPlayerStore();
-
-const handlePlayTrack = async (trackUri: string) => {
-  const token = localStorage.getItem('spotifyAccessToken');
-  if (!token || !deviceId) {
-    alert('Spotify not ready. Please wait a moment.');
-    return;
-  }
-
-  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ uris: [trackUri] }),
-  });
-};
-
-
 type Props = {
   albumId: string;
   albumName: string;
@@ -46,28 +26,29 @@ type Props = {
 export default function AlbumPageClient(props: Props) {
   const [newPost, setNewPost] = useState(null);
 
-  const albumArtistSet = new Set(
-    props.artistName.split(',').map((a) => a.trim().toLowerCase())
-  );
+  const { deviceId, isConnected } = useSpotifyPlayerStore();
 
-  const handlePlayTrack = async (trackId: string) => {
-    const tokenRes = await fetch('/api/token'); // Or however you get your token
-    const { access_token } = await tokenRes.json();
-  
-    const deviceId = localStorage.getItem('spotifyDeviceId'); // Assuming you store it on load
-    if (!access_token || !deviceId) return alert('Spotify not ready');
+  const handlePlayTrack = async (trackUri: string) => {
+    const token = localStorage.getItem('spotifyAccessToken');
+    if (!token || !deviceId) {
+      alert('Spotify not ready. Please wait a moment.');
+      return;
+    }
   
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        uris: [`spotify:track:${trackId}`],
-      }),
+      body: JSON.stringify({ uris: [trackUri] }),
     });
-  };  
+  };
+  
+
+  const albumArtistSet = new Set(
+    props.artistName.split(',').map((a) => a.trim().toLowerCase())
+  );
 
   return (
     <div className="mt-4">
@@ -126,7 +107,7 @@ export default function AlbumPageClient(props: Props) {
               <li 
                 key={track.id} 
                 onClick={() => handlePlayTrack(`spotify:track:${track.id}`)} 
-                className="flex justify-between items-start p-3 rounded-md transition cursor-pointer hover:border hover:border-gray-400">
+                className="flex justify-between items-start p-2 rounded-md border border-black transition cursor-pointer hover:border hover:border-gray-400">
                 <div className="flex gap-4">
                   <span className="w-6 text-right text-sm text-gray-500">
                     {index + 1}
