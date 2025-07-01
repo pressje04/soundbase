@@ -19,6 +19,7 @@ export default function ScorePill({
     };
 
     const getColorClass = (score: number) => {
+        if (score === 10.0) return 'holo-gradient';
         if (score >= 9.0) return 'bg-purple-500';
         if (score >= 7.0) return 'bg-green-600';
         if (score >= 6.0) return 'bg-yellow-500';

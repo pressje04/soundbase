@@ -68,3 +68,37 @@ body {
   }
 }
 
+.holo-gradient {
+  background: linear-gradient(
+    115deg,
+    #f5f7fa,
+    #c3cfe2,
+    #f6d365,
+    #fda085,
+    #a1c4fd,
+    #c2e9fb,
+    #d4fc79,
+    #96e6a1,
+    #fddb92,
+    #d1fdff
+  );
+  background-size: 300% 300%;
+  animation: shimmer 6s ease infinite;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
