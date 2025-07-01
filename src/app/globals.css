@@ -38,6 +38,7 @@ body {
   .shimmer {
     position: relative;
     overflow: hidden;
+    z-index: 0;
     isolation: isolate;
   }
   

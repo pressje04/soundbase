@@ -29,6 +29,25 @@ export default function AlbumPageClient(props: Props) {
     props.artistName.split(',').map((a) => a.trim().toLowerCase())
   );
 
+  const handlePlayTrack = async (trackId: string) => {
+    const tokenRes = await fetch('/api/token'); // Or however you get your token
+    const { access_token } = await tokenRes.json();
+  
+    const deviceId = localStorage.getItem('spotifyDeviceId'); // Assuming you store it on load
+    if (!access_token || !deviceId) return alert('Spotify not ready');
+  
+    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        uris: [`spotify:track:${trackId}`],
+      }),
+    });
+  };  
+
   return (
     <div className="mt-4">
       {/* Album Image and Header */}
@@ -83,7 +102,10 @@ export default function AlbumPageClient(props: Props) {
               albumArtistSet.size === trackArtistNames.length;
 
             return (
-              <li key={track.id} className="flex justify-between items-start">
+              <li 
+                key={track.id} 
+                onClick={() => handlePlayTrack(track.id)} 
+                className="flex justify-between items-start">
                 <div className="flex gap-4">
                   <span className="w-6 text-right text-sm text-gray-500">
                     {index + 1}
