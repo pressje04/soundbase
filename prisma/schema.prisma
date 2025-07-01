@@ -68,6 +68,14 @@ model User {
   reposts             Repost[]
   reviews             Review[]
   sessionParticipants SessionParticipant[] @relation("UserSessionParticipants")
+  tags UserTag[] //one to many relationship (1 user can have many tags, 1 tag can belong to many users)
+}
+
+model UserTag {
+  id    String  @id @default(cuid())
+  label String 
+  user  User @relation(fields: [userId], references: [id])
+  userId String
 }
 
 model ListeningSession {

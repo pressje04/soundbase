@@ -19,7 +19,11 @@ export async function GET(req: NextRequest) {
     where: { albumId, parentId: null },
     orderBy: { createdAt: 'desc' },
     include: {
-      user: true,
+      user: {
+        include: {
+          tags: true,
+        }
+      },
       replies: {
         include: { user: true },
         orderBy: { createdAt: 'asc' },

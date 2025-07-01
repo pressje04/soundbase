@@ -84,7 +84,7 @@ useEffect(() => {
   return (
     <>
     <Navbar />
-    <div className="pt-12 mt-24 flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 text-center">
+    <div className="pt-12 mt-24 mb-8 flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 text-center">
     <h1 className="text-5xl font-bold mb-4">
   {loading ? (
     <>Loading...</>

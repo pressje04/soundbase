@@ -115,68 +115,84 @@ export default function PostItem({
   return (
     <div className="w-full max-w-xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-700 pt-4 pb-6">
       {post.repostedBy && (
-        <p className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-          <Repeat2 size={16} strokeWidth={2} />
-          @{post.repostedBy.username} reposted
-         </p>
-      )}
+      <p className="flex items-center gap-2 text-sm text-gray-400 mb-2">
+        <Repeat2 size={16} strokeWidth={2} />
+        @{post.repostedBy.username} reposted
+      </p>
+    )}
 
-      <div className="flex items-start gap-4">
-        <Link href={`/profile/${post.user?.id}`} className="shrink-0">
-          {post.user?.image ? (
-            <Image
-              src={post.user.image}
-              alt="Profile"
-              width={48}
-              height={48}
-              className="rounded-full object-cover w-12 h-12"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-              {post.user?.firstName?.charAt(0) ?? 'A'}
-            </div>
-          )}
-        </Link>
+    <div className="flex items-start gap-4">
+      <Link href={`/profile/${post.user?.id}`} className="shrink-0">
+        {post.user?.image ? (
+          <Image
+            src={post.user.image}
+            alt="Profile"
+            width={48}
+            height={48}
+            className="rounded-full object-cover w-12 h-12"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
+            {post.user?.firstName?.charAt(0) ?? 'A'}
+          </div>
+        )}
+      </Link>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between flex-wrap min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-white">
-                {post.user?.firstName ?? 'Anonymous'}
-                <span className="ps-2 font-semibold text-gray-500">
-                  @{post.user?.username ?? '@anonymous'}
-                </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center justify-between min-w-0">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
+            <span className="font-semibold text-white truncate">
+              {post.user?.firstName ?? 'Anonymous'}
+              <span className="ps-2 font-semibold text-gray-500 truncate">
+                @{post.user?.username ?? '@anonymous'}
               </span>
-              {post.isReview && (
-                <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 mr-1 rounded-full">
-                  Review
-                </span>
-              )}
-            </div>
-            {isAuthor && (
-  <div className="flex items-center gap-2 ml-auto mr-2">
-    <button
-      onClick={() => setEditingPost(post)} // open edit modal
-      className="text-md text-gray-500 hover:text-green-500 transition"
-    >
-      <Pencil size={24} strokeWidth={3} />
-      
-    </button>
-    <button
-      onClick={handleDelete}
-      className="text-md text-gray-500 hover:text-red-500 transition"
-    >
-      <X size={28} strokeWidth={3} />
-    </button>
-  </div>
-)}
+            </span>
 
+            {/* Review Pill */}
+            {post.isReview && (
+              <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                Review
+              </span>
+            )}
+
+            {/* User Tags */}
+            {post.user?.tags?.map((tag: any) => (
+              <span
+                key={tag.id}
+                className={`text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap
+                  ${tag.label === 'Day 1' ? 'holo-gradient' : 'bg-gray-700 text-white'}
+                `}
+              >
+                {tag.label}
+              </span>
+            ))}
+          </div>
+
+          {/* Author Controls + Score */}
+          <div className="flex items-center gap-2 ml-auto mt-2 sm:mt-0">
+            {isAuthor && (
+              <>
+                <button
+                  onClick={() => setEditingPost(post)}
+                  className="text-md text-gray-500 hover:text-green-500 transition"
+                >
+                  <Pencil size={24} strokeWidth={3} />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="text-md text-gray-500 hover:text-red-500 transition"
+                >
+                  <X size={28} strokeWidth={3} />
+                </button>
+              </>
+            )}
             {post.rating !== null && post.rating !== undefined && (
               <span className="shrink-0">
-              <ScorePill size="md" score={post.rating} />
-            </span>            
+                <ScorePill size="md" score={post.rating} />
+              </span>
             )}
           </div>
+        </div>
 
           <p className="mt-1 text-gray-300 whitespace-pre-wrap break-words">
   {post.comment?.length > MAX_LENGTH && !expanded
@@ -339,4 +355,4 @@ export default function PostItem({
       </div>
     </div>
   );
-}
+};
