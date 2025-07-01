@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getCurrentUser } from '@/lib/auth'; // or wherever your auth helper lives
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth'; 
 
 export async function DELETE(
     req: NextRequest,

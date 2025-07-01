@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 
 export async function DELETE(req: Request) {
@@ -12,8 +12,6 @@ export async function DELETE(req: Request) {
       { status: 400 }
     );
   }
-
-  const prisma = new PrismaClient();
 
   try {
     await prisma.artistFollow.delete({

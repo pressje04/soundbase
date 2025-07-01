@@ -2,6 +2,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUser } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -11,8 +13,6 @@ export async function GET(req: Request) {
   if (!user || !artistId) {
     return NextResponse.json({ following: false });
   }
-
-  const prisma = new PrismaClient();
 
   const follow = await prisma.artistFollow.findUnique({
     where: {

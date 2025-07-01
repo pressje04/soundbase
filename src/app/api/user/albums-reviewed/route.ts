@@ -1,9 +1,7 @@
 // app/api/user/albums-reviewed/route.ts
 import { getCurrentUser } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-
-const prisma = new PrismaClient();
 
 export async function GET() {
   const user = await getCurrentUser();

@@ -3,9 +3,7 @@ for permission/authentication purposes*/
 
 import {NextRequest, NextResponse} from 'next/server';
 import jwt from 'jsonwebtoken';
-import {PrismaClient} from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
     const token = req.cookies.get('token')?.value;

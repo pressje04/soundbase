@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client'; // make sure this path is correct in your project
+import { prisma } from '@/lib/prisma';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -10,7 +10,6 @@ export async function GET(req: Request) {
   }
 
   try {
-    const prisma = new PrismaClient();
     const user = await prisma.user.findUnique({
       where: { id },
       include: {

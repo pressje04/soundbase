@@ -3,10 +3,8 @@
 This essentially fetches what the 'POSTS' tab should display when it renders
 */
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from "@/lib/auth";
-
-const prisma = new PrismaClient();
 
 export async function GET(_: NextRequest, {params}: {params: {id: string}}) {
     const userId = params.id;

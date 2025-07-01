@@ -5,7 +5,7 @@ Part of following artists logic
 */
 
 import {NextResponse, NextRequest} from 'next/server';
-import {PrismaClient} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
     const {id, name} = await req.json();
@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const prisma = new PrismaClient();
         await prisma.artist.upsert({
             where: {id},
             update: {},

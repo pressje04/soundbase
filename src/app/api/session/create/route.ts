@@ -1,9 +1,7 @@
 // app/api/session/create/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
-
-const prisma = new PrismaClient();
 
 export async function POST() {
   const user = await getCurrentUser();

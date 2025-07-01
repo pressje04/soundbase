@@ -3,10 +3,9 @@ The POST request is for following users/establishing connection
 and obviously the DELETE request is for unfollowing */
 
 import {NextRequest, NextResponse} from 'next/server';
-import {PrismaClient} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-    const prisma = new PrismaClient();
     const {followerId, followingId} = await req.json();
 
     //Can't follow ourselves, make sure fields are present and they aren't the same
@@ -28,7 +27,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const prisma = new PrismaClient();
     const {followerId, followingId} = await req.json();
 
     if (!followerId || !followingId) {

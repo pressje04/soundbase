@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getCurrentUser } from '@/lib/auth'; // ✅ import the server-side auth helper
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   const { artistId } = await req.json();
@@ -12,8 +13,6 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-
-  const prisma = new PrismaClient();
 
   try {
     const follow = await prisma.artistFollow.create({
