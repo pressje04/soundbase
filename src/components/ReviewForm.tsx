@@ -24,6 +24,11 @@ type ReviewFormProps = {
   releaseYear: string;
   imageUrl: string;
   tracklist: { id: string; name: string }[];
+  initialScore?: number;
+  initialText?: string;
+  initialTrackRanking?: string[];
+  isEditing?: boolean;
+  postId?: string;
 };
 
 export default function ReviewForm({
@@ -35,31 +40,42 @@ export default function ReviewForm({
   releaseYear,
   imageUrl,
   tracklist,
+  initialScore,
+  initialText,
+  initialTrackRanking,
+  isEditing,
+  postId,
 }: ReviewFormProps) {
-  const [score, setScore] = useState<number>(0);
-  const [text, setText] = useState('');
-  const [rankTracks, setRankTracks] = useState(false);
+  const [score, setScore] = useState<number>(initialScore ?? 0);
+  const [text, setText] = useState(initialText ?? '');
+  const [rankTracks, setRankTracks] = useState(!!initialTrackRanking?.length);
   const [rankedTracks, setRankedTracks] = useState(
-    tracklist.map((track) => ({
-      ...track,
-      imageUrl, // attach album image
-    }))
+  initialTrackRanking
+    ? initialTrackRanking.map((id) => {
+        const track = tracklist.find((t) => t.id === id);
+        return { ...track!, imageUrl }; // track! because we know it came from tracklist
+      })
+    : tracklist.map((track) => ({
+        ...track,
+        imageUrl,
+      }))
   );
+
 
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!userId) {
       router.push('/signup');
       return;
     }
-
+  
     if (score < 0 || score > 10) return alert('Score must be between 0 and 10');
     if (text.trim().length === 0) return alert('Review text cannot be empty');
-
-    onSubmit({
+  
+    const payload = {
       score,
       text,
       albumName,
@@ -68,9 +84,28 @@ export default function ReviewForm({
       imageUrl,
       isReview: true,
       trackRanking: rankTracks ? rankedTracks.map((t) => t.id) : undefined,
-    });
-
-    onClose();
+    };
+  
+    try {
+      if (isEditing && postId) {
+        // PATCH request to update
+        const res = await fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+  
+        if (!res.ok) throw new Error('Failed to update post');
+      } else {
+        // Submit normally
+        onSubmit(payload);
+      }
+  
+      onClose();
+    } catch (err) {
+      console.error('Submit error:', err);
+      alert('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -147,7 +182,7 @@ export default function ReviewForm({
                 type="submit"
                 className="px-4 py-2 font-bold bg-blue-600 hover:bg-blue-700 rounded text-white"
               >
-                Submit Review
+                {isEditing ? 'Save Changes' : 'Submit Review'}
               </button>
             </div>
           </div>

@@ -3,7 +3,8 @@ import ScorePill from './ScorePill';
 import Image from 'next/image';
 import useUser from '@/hooks/useUser';
 import Link from 'next/link';
-import { Heart, Repeat2, MessageCircle, Eye, X } from 'lucide-react';
+import ReviewForm from './ReviewForm';
+import { Pencil, Heart, Repeat2, MessageCircle, Eye, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function PostItem({
@@ -22,6 +23,7 @@ export default function PostItem({
   const [topTracks, setTopTracks] = useState<
     { id: string; name: string; imageUrl: string }[]
   >([]);
+  const [editingPost, setEditingPost] = useState<any | null>(null);
 
   const [expanded, setExpanded] = useState(false);
   const MAX_LENGTH = 500;
@@ -62,7 +64,6 @@ export default function PostItem({
               : null;
           })
           .filter(Boolean)
-          .slice(0, 5);
 
         setTopTracks(ranked as { id: string; name: string; imageUrl: string }[]);
       } catch (err) {
@@ -147,19 +148,29 @@ export default function PostItem({
                 </span>
               </span>
               {post.isReview && (
-                <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                <span className="bg-red-600 text-white text-xs font-semibold px-2 py-1 mr-1 rounded-full">
                   Review
                 </span>
               )}
             </div>
             {isAuthor && (
-              <button
-                onClick={handleDelete}
-                className="text-md text-gray-500 hover:text-red-500 ml-auto mr-2 transition"
-              >
-                <X size={28} strokeWidth={3} />
-              </button>
-            )}
+  <div className="flex items-center gap-2 ml-auto mr-2">
+    <button
+      onClick={() => setEditingPost(post)} // open edit modal
+      className="text-md text-gray-500 hover:text-green-500 transition"
+    >
+      <Pencil size={24} strokeWidth={3} />
+      
+    </button>
+    <button
+      onClick={handleDelete}
+      className="text-md text-gray-500 hover:text-red-500 transition"
+    >
+      <X size={28} strokeWidth={3} />
+    </button>
+  </div>
+)}
+
             {post.rating !== null && post.rating !== undefined && (
               <span className="shrink-0">
               <ScorePill size="md" score={post.rating} />
@@ -203,37 +214,98 @@ export default function PostItem({
     </div>
   </Link>
 )}
+ 
+ {topTracks.length > 0 && (
+  <div className="mt-4 bg-black rounded-xl shadow-md">
+    <h4 className="text-base font-bold text-white mb-4 tracking-wide">
+      Track Ranking
+    </h4>
+
+    <ol className="space-y-3">
+      {(expanded ? topTracks : topTracks.slice(0, 5)).map((track, index) => (
+        <li
+          key={track.id}
+          className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg w-full overflow-hidden"
+        >
+          <div
+            className={`w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full font-semibold text-sm relative
+            ${
+          index === 0
+        ? 'bg-gold shimmer'
+        : index === 1
+        ? 'bg-silver shimmer'
+        : index === 2
+        ? 'bg-bronze shimmer'
+        : 'bg-zinc-700 text-gray-300'
+    }
+  `}
+>
+  {index + 1}
+</div>
+
+          <img
+            src={track.imageUrl}
+            alt={`${track.name} cover`}
+            className="w-10 h-10 rounded object-cover flex-shrink-0"
+          />
+
+          <span className="text-white text-sm font-medium truncate flex-1">
+            {track.name}
+          </span>
+        </li>
+      ))}
+    </ol>
+
+    {topTracks.length > 5 && (
+      <button
+        onClick={() => setExpanded((prev) => !prev)}
+        className="mt-2 text-sm text-blue-400 hover:underline"
+      >
+        {expanded ? 'Show Top 5 Only' : 'Show Full Ranking'}
+      </button>
+    )}
+  </div>
+)}
 
 
-          {topTracks.length > 0 && (
-            <div className="mt-4 bg-black rounded-xl shadow-md">
-              <h4 className="text-base font-bold text-white mb-4 tracking-wide">
-                Top 5 Tracks
-              </h4>
-              <ol className="space-y-3">
-                {topTracks.map((track, index) => (
-                  <li
-                    key={track.id}
-                    className="flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 transition-colors p-3 rounded-lg w-full overflow-hidden"
-                  >
-                    <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full bg-zinc-700 text-sm text-gray-300 font-semibold">
-                      {index + 1}
-                    </div>
+          
 
-                    <img
-                      src={track.imageUrl}
-                      alt={`${track.name} cover`}
-                      className="w-10 h-10 rounded object-cover flex-shrink-0"
-                    />
+{editingPost && (
+  <ReviewForm
+    isEditing
+    onClose={() => setEditingPost(null)}
+    onSubmit={async (payload) => {
+      await fetch(`/api/posts/${editingPost.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-                    <span className="text-white text-sm font-medium truncate flex-1">
-                      {track.name}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
+      post.comment = payload.text;
+      post.rating = payload.score;
+      post.trackRanking = payload.trackRanking;
+
+      if (payload.trackRanking) {
+        const ranked = payload.trackRanking
+          .map((id) => topTracks.find((track) => track.id === id))
+          .filter(Boolean)
+        
+        setTopTracks(ranked as {id: string; name: string; imageUrl: string}[]);
+      }
+      setEditingPost(null);
+    }}
+    userId={user?.id ?? null}
+    albumName={editingPost.albumName}
+    artistName={editingPost.artistName}
+    releaseYear={editingPost.releaseYear}
+    imageUrl={editingPost.imageUrl}
+    tracklist={topTracks.length > 0 ? topTracks : []} // or fetch if needed
+    initialScore={editingPost.rating}
+    initialText={editingPost.comment}
+    initialTrackRanking={editingPost.trackRanking}
+  />
+)}
+
 
 <div className="flex flex-wrap justify-between gap-y-2 w-full mt-3 text-sm text-gray-400 px-2 overflow-hidden">
             <span className="flex items-center gap-2">

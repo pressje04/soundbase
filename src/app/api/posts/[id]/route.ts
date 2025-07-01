@@ -76,3 +76,27 @@ export async function GET(
     }
   }
   
+  export async function PATCH(
+    req: Request,
+    { params }: { params: { id: string } }
+  ) {
+    const user = await getCurrentUser();
+    if (!user) return new NextResponse('Unauthorized', { status: 401 });
+  
+    const postId = params.id;
+    const body = await req.json();
+  
+    const updated = await prisma.post.update({
+      where: {
+        id: postId,
+        userId: user.id,
+      },
+      data: {
+        rating: body.score,
+        comment: body.text,
+        trackRanking: body.trackRanking,
+      },
+    });
+  
+    return NextResponse.json(updated);
+  }
