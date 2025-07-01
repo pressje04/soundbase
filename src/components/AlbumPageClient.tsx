@@ -7,6 +7,27 @@ import AlbumPlayerClient from './AlbumPlayerClient';
 import PostList from './PostList';
 import { useState } from 'react';
 import CommentComposer from './CommentField';
+import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
+
+const { deviceId, isConnected } = useSpotifyPlayerStore();
+
+const handlePlayTrack = async (trackUri: string) => {
+  const token = localStorage.getItem('spotifyAccessToken');
+  if (!token || !deviceId) {
+    alert('Spotify not ready. Please wait a moment.');
+    return;
+  }
+
+  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ uris: [trackUri] }),
+  });
+};
+
 
 type Props = {
   albumId: string;
@@ -104,8 +125,8 @@ export default function AlbumPageClient(props: Props) {
             return (
               <li 
                 key={track.id} 
-                onClick={() => handlePlayTrack(track.id)} 
-                className="flex justify-between items-start">
+                onClick={() => handlePlayTrack(`spotify:track:${track.id}`)} 
+                className="flex justify-between items-start p-3 rounded-md transition cursor-pointer hover:border hover:border-gray-400">
                 <div className="flex gap-4">
                   <span className="w-6 text-right text-sm text-gray-500">
                     {index + 1}
