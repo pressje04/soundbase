@@ -25,9 +25,10 @@ Soundbase is a full-stack social music platform where users can discover, review
 
 - 🔐 **Secure Auth**: Sign in via Google OAuth with JWT-based session handling  
 - 📀 **Dynamic Album Pages**: Pull album metadata via Spotify API and render song lists, cover art, and more  
-- ⭐ **Album Reviews**: Leave detailed reviews with a scroll-based rating pill component  
+- ⭐ **Album Reviews**: Leave detailed reviews with a scroll-based rating pill component and optionally rank tracks
 - 💬 **Comments & Threads**: Interact with reviews via threaded comments, replies, and discussion posts  
-- ❤️ **Engagement Tools**: Like, repost, comment, and track view counts on posts  
+- ❤️ **Engagement Tools**: Like, repost, comment, and track view counts on posts
+- 📷 **Listening Sessions**: Listen to music in real time with friends
 - 📈 **Review Scores**: Average scores calculated and displayed per album in real time  
 - 🎵 **Streaming**: Logged-in Spotify Premium users can stream albums directly  
 - 🧑‍🤝‍🧑 **Follow System**: Follow users and artists to see their activity and reviews  
@@ -39,7 +40,8 @@ Soundbase is a full-stack social music platform where users can discover, review
 
 - **Spotify Web API** – For fetching album/track metadata and enabling streaming  
 - **Spotify Web Playback SDK** – For full in-browser audio playback (Premium only)  
-- **Google OAuth (NextAuth)** – Seamless login/signup flow  
+- **Google OAuth (NextAuth)** – Seamless login/signup flow
+- **WebRTC and Socket.IO** - Real-time video/audio calls with in-sync music streaming between parties
 - **Prisma** – Schema-based ORM for type-safe DB queries  
 - **Supabase** – Hosted PostgreSQL with serverless database access  
 - **Tailwind CSS** – Utility-first CSS framework for rapid UI development  
