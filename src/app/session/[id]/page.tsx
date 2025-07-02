@@ -42,6 +42,8 @@ export default function SessionPage() {
   >([]);
   const [newMessage, setNewMessage] = useState('');
 
+  const [chatOpen, setChatOpen] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       const [sessionRes, userRes] = await Promise.all([
@@ -122,7 +124,7 @@ export default function SessionPage() {
   flex container to that I can partition the page essentially having 
   the chat as its on panel on the right partition of the screen */
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gradient-to-br from-black via-zinc-900 to-zinc-800 text-white">
       {/* Left side: main content */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="mb-20">
@@ -193,34 +195,63 @@ export default function SessionPage() {
       <VideoCall sessionId={session.id}/>
       </div>
       </div>
+
+      <button
+  onClick={() => setChatOpen(true)}
+  className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg"
+>
+  Chat 💬
+</button>
+
   
-      {/* Right side: chat panel */}
-      <div className="mt-24 w-80 bg-zinc-900 p-4 pb-32 border-l border-zinc-700 flex flex-col">
-        <h2 className="text-lg font-semibold mb-2 text-white">Chat</h2>
-        <div className="bg-zinc-900 text-black rounded p-3 flex-1 overflow-y-scroll text-white mb-2">
-          {messages.map((msg, idx) => (
-            <p key={idx}>
-              <strong>{msg.user}:</strong> {msg.message}
-            </p>
-          ))}
-        </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!newMessage.trim()) return;
-            socket?.emit('chat_message', { user: firstName, message: newMessage.trim(),
-            timestamp: Date.now() });
-            setNewMessage('');
-          }}
+{chatOpen && (
+  <div className="fixed inset-0 z-40 flex justify-end">
+    {/* Background blur overlay */}
+    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setChatOpen(false)} />
+
+    {/* Chat panel */}
+    <div className="relative w-80 h-full bg-zinc-900 p-4 pb-32 border-l border-zinc-700 flex flex-col z-50 shadow-xl">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-lg font-semibold text-white">Chat</h2>
+        <button
+          onClick={() => setChatOpen(false)}
+          className="text-white hover:text-red-500 text-xl font-bold"
         >
-          <input
-            className="border px-2 py-1 rounded w-full text-white"
-            placeholder="Type your message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-        </form>
+          ✕
+        </button>
       </div>
+      <div className="flex-1 overflow-y-scroll text-white space-y-2">
+        {messages.map((msg, idx) => (
+          <p key={idx}>
+            <strong>{msg.user}:</strong> {msg.message}
+          </p>
+        ))}
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!newMessage.trim()) return;
+          socket?.emit('chat_message', {
+            user: firstName,
+            message: newMessage.trim(),
+            timestamp: Date.now(),
+          });
+          setNewMessage('');
+        }}
+        className="mt-4"
+      >
+        <input
+          className="w-full px-3 py-2 rounded bg-zinc-800 text-white"
+          placeholder="Type a message..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+        />
+      </form>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
   

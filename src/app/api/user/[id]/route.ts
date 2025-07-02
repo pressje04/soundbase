@@ -9,7 +9,11 @@ export async function GET(
     const post = await prisma.post.findUnique({
       where: { id: params.id },
       include: {
-        user: true,
+        user: {
+          include: {
+            tags: true, // 👈 this line includes the user's tags
+          },
+        },
         _count: {
           select: {
             likes: true,
@@ -19,7 +23,7 @@ export async function GET(
         },
       },
     });
-
+    
     if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }

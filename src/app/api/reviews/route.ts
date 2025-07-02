@@ -56,7 +56,11 @@ export async function GET(req: NextRequest) {
         },
       },
       include: {
-        user: true,
+        user: {
+          include: {
+            tags: true,
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc',

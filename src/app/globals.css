@@ -106,4 +106,101 @@ body {
   }
 }
 
+@keyframes session-shimmer {
+  0% {
+    background-position: -100%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 105, 180, 0.5),  /* Hot Pink */
+    rgba(255, 165, 0, 0.5),    /* Bright Orange */
+    rgba(255, 192, 203, 0.5)   /* Soft Pink */
+  );
+  background-size: 300%;
+  animation: session-shimmer 2.5s linear infinite;
+  mix-blend-mode: overlay;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes blob-slow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(20px, -10px) scale(1.05);
+  }
+  66% {
+    transform: translate(-15px, 15px) scale(0.95);
+  }
+}
+
+.animate-blob-slow {
+  animation: blob-slow 10s ease-in-out infinite;
+}
+.delay-2000 {
+  animation-delay: 2s;
+}
+.delay-4000 {
+  animation-delay: 4s;
+}
+
+@keyframes blob-motion {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(25px, -20px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 15px) scale(0.9);
+  }
+}
+
+.animate-blob-motion {
+  animation: blob-motion 14s ease-in-out infinite;
+}
+.delay-2000 {
+  animation-delay: 2s;
+}
+.delay-4000 {
+  animation-delay: 4s;
+}
+
+/* For Session landing page album scroll */
+
+@keyframes scroll-x-slow {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.animate-scroll-x-slow {
+  animation: scroll-x-slow 30s linear infinite;
+}
+
+@keyframes scroll-x-cyclic {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-x-cyclic {
+  animation: scroll-x-cyclic 60s linear infinite;
+}
 

@@ -26,7 +26,11 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { createdAt: 'desc' },
     include: {
-      user: true,
+      user: {
+        include: {
+          tags: true,
+        }
+      },
       replies: { include: { user: true }, orderBy: { createdAt: 'asc' } },
       likes: currentUser
         ? { where: { userId: currentUser.id }, select: { id: true } }

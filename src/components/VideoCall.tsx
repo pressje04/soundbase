@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import {Camera, CameraOff, Mic, MicOff} from 'lucide-react';
 import io from 'socket.io-client';
 
 // Initialize socket connection to server
@@ -122,18 +123,18 @@ export default function VideoCall({ sessionId }: { sessionId: string }) {
     <div className="flex gap-4">
       <div className="relative w-1/2 bg-black rounded">
         <video ref={localVideoRef} autoPlay playsInline muted className="w-full rounded" />
-        <div className="absolute bottom-2 left-2 flex gap-2">
+        <div className="justify-center mb-2 flex gap-2">
           <button
             onClick={toggleCamera}
-            className="bg-white bg-opacity-80 text-black px-2 py-1 rounded"
+            className="bg-gray-800 bg-opacity-80 text-black px-2 py-1 rounded"
           >
-            {cameraOn ? '📷 On' : '📷 Off'}
+            {cameraOn ? <Camera className="text-gray"/> : <CameraOff className="text-red-500 hover:text-red-400 transition"/>}
           </button>
           <button
             onClick={toggleMic}
-            className="bg-white bg-opacity-80 text-black px-2 py-1 rounded"
+            className="bg-gray-800 bg-opacity-80 text-black px-2 py-1 rounded"
           >
-            {micOn ? '🎤 On' : '🎤 Off'}
+            {micOn ? <Mic className="text-gray-500"/> : <MicOff className="text-red-500 hover:text-red-600 transition" />}
           </button>
         </div>
       </div>
