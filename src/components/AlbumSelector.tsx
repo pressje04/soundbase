@@ -39,7 +39,11 @@ export default function AlbumSelector({ onSelect }: { onSelect: (album: Album) =
           <div
             key={album.id}
             className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded"
-            onClick={() => onSelect(album)}
+            onClick={() => {
+              onSelect(album);
+              setQuery(''); 
+              setAlbums([]);   
+            }}
           >
             <img src={album.images[0]?.url} className="w-10 h-10 rounded" alt="" />
             <div>

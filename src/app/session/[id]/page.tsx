@@ -6,6 +6,8 @@ import io from 'socket.io-client';
 import AlbumSelector from '@/components/AlbumSelector';
 import Navbar from '@/components/navbar';
 import VideoCall from '@/components/VideoCall';
+import { Users, UserPlus, MessageSquareText, DoorOpen } from 'lucide-react';
+import InviteModal from '@/components/InviteModal';
 
 type Album = {
   id: string;
@@ -42,7 +44,12 @@ export default function SessionPage() {
   >([]);
   const [newMessage, setNewMessage] = useState('');
 
+  //Bottom bar
   const [chatOpen, setChatOpen] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const[showParticipants, setShowParticipants] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -130,10 +137,6 @@ export default function SessionPage() {
         <div className="mb-20">
           <Navbar />
         </div>
-        <h1 className="text-2xl font-bold">🎧 Listening Party</h1>
-        <p className="text-gray-500">
-          Host: {session.host.firstName} | Session ID: {session.id}
-        </p>
   
         {isHost && (
           <div className="mt-6">
@@ -168,42 +171,10 @@ export default function SessionPage() {
             ))}
           </ul>
         </div>
-        {isHost && (
-          <button
-            onClick={async () => {
-            const confirmed = confirm('Are you sure you want to end this session?');
-            if (!confirmed) return;
-
-            const res = await fetch(`/api/session/${session.id}/end`, {
-              method: 'DELETE',
-            });
-
-            if (res.ok) {
-              alert('Session ended.');
-              window.location.href = '/session'; // Redirect to landing
-            } else {
-              const data = await res.json();
-              alert(`Failed to end session: ${data.error}`);
-            }
-         }}
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-        >
-        End Session
-        </button>
-      )}
       <div className="mt-10">
       <VideoCall sessionId={session.id}/>
       </div>
       </div>
-
-      <button
-  onClick={() => setChatOpen(true)}
-  className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg"
->
-  Chat 💬
-</button>
-
-  
 {chatOpen && (
   <div className="fixed inset-0 z-40 flex justify-end">
     {/* Background blur overlay */}
@@ -250,9 +221,75 @@ export default function SessionPage() {
     </div>
   </div>
 )}
+   {/* Fixed Bottom Bar */}
+<div className="fixed bottom-0 left-0 w-full bg-zinc-900 border-t border-zinc-700 py-3 px-6 flex justify-between items-center z-50">
+  <div className="flex flex-grow ml-4 justify-between max-w-xs">
+    {/* Participants */}
+    <button
+      onClick={() => setShowParticipants(true)}
+      className="text-white hover:text-blue-400 transition"
+    >
+      <Users />
+    </button>
 
+    {/* Chat */}
+    <button
+      onClick={() => setChatOpen(true)}
+      className="text-white hover:text-blue-400 transition"
+    >
+      <MessageSquareText />
+    </button>
 
-    </div>
+    {/* Host-only Invite button */}
+    {isHost && (
+      <button
+        onClick={() => setShowInviteModal(true)}
+        className="text-white hover:text-green-400 transition"
+      >
+        <UserPlus />
+      </button>
+    )}
+  </div>
+
+  {/* Leave button */}
+  {isHost && (
+          <button
+            onClick={async () => {
+            const confirmed = confirm('Are you sure you want to end this session?');
+            if (!confirmed) return;
+
+            const res = await fetch(`/api/session/${session.id}/end`, {
+              method: 'DELETE',
+            });
+
+            if (res.ok) {
+              alert('Session ended.');
+              window.location.href = '/session'; // Redirect to landing
+            } else {
+              const data = await res.json();
+              alert(`Failed to end session: ${data.error}`);
+            }
+         }}
+          className="bg-red-600 hover:bg-red-500 text-white px-4 py-1.5 rounded-md text-sm font-medium"
+        >
+        End Session
+        </button>
+      )}
+  <button
+    onClick={() => router.push('/session')}
+    className="hover:text-red-500"
+  >
+    <DoorOpen />
+  </button>
+  {showInviteModal && (
+  <InviteModal
+    sessionId={session.id}
+    onClose={() => setShowInviteModal(false)}
+  />
+)}
+
+</div>
+</div>
   );
   
 }
