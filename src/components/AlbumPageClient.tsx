@@ -35,14 +35,22 @@ export default function AlbumPageClient(props: Props) {
       return;
     }
   
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    const res = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ uris: [trackUri] }),
+      // Preserve the album queue so the player can move to adjacent tracks.
+      body: JSON.stringify({
+        context_uri: `spotify:album:${props.albumId}`,
+        offset: { uri: trackUri },
+      }),
     });
+
+    if (!res.ok) {
+      console.error('Failed to start track playback:', await res.text());
+    }
   };
   
 
