@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getSpotifyFallbackAlbums } from '@/lib/spotifyAlbums';
 
 export async function GET() {
   try {
@@ -34,6 +35,11 @@ export async function GET() {
     return NextResponse.json(uniqueAlbums);
   } catch (error) {
     console.error('Error fetching recently reviewed albums:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    try {
+      return NextResponse.json(await getSpotifyFallbackAlbums());
+    } catch (fallbackError) {
+      console.error('Failed to fetch Spotify fallback albums:', fallbackError);
+      return NextResponse.json({ error: 'Albums are unavailable' }, { status: 502 });
+    }
   }
 }

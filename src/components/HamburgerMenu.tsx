@@ -11,32 +11,8 @@ export default function HamburgerMenu() {
   const {user, loading} = useUser();
 
   const handleSpotifyLogin = async () => {
-    const verifier = generateCodeVerifier();
-    const challenge = await generateCodeChallenge(verifier);
-    const authUrl = new URL('https://accounts.spotify.com/authorize');
-
-    authUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!);
-    authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('redirect_uri', process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!);
-    authUrl.searchParams.set('scope', 'user-read-private user-read-email streaming');
-    authUrl.searchParams.set('code_challenge_method', 'S256');
-    authUrl.searchParams.set('code_challenge', challenge);
-    authUrl.searchParams.set('state', btoa(verifier));
-
-    window.location.href = authUrl.toString();
+    window.location.assign('/api/spotify/login');
   };
-
-  function generateCodeVerifier(length = 128): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  }
-
-  async function generateCodeChallenge(verifier: string): Promise<string> {
-    const data = new TextEncoder().encode(verifier);
-    const digest = await crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode(...new Uint8Array(digest)))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
 
   return (
     <div className="lg:hidden fixed top-4 right-4 z-50">

@@ -21,8 +21,12 @@ function sha256(buffer: string) {
 }
 
 export async function GET() {
-  const clientId = process.env.SPOTIFY_CLIENT_ID!;
-  const redirectUri = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!;
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const redirectUri = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI;
+
+  if (!clientId || !redirectUri) {
+    return NextResponse.json({ error: 'Spotify login is not configured' }, { status: 500 });
+  }
   const state = generateRandomStr(16);
   const codeVerifier = generateRandomStr(64);
   const codeChallenge = base64URLEncode(sha256(codeVerifier));
@@ -30,7 +34,13 @@ export async function GET() {
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId,
-    scope: 'streaming user-read-email user-read-private user-modify-playback-state',
+    scope: [
+      'streaming',
+      'user-read-email',
+      'user-read-private',
+      'user-read-playback-state',
+      'user-modify-playback-state',
+    ].join(' '),
     redirect_uri: redirectUri,
     state,
     code_challenge_method: 'S256',
@@ -40,6 +50,14 @@ export async function GET() {
   const response = NextResponse.redirect(
     `https://accounts.spotify.com/authorize?${params.toString()}`
   );
-  response.cookies.set('spotify_code_verifier', codeVerifier, { path: '/' });
+  const cookieOptions = {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 10 * 60,
+  };
+  response.cookies.set('spotify_code_verifier', codeVerifier, cookieOptions);
+  response.cookies.set('spotify_auth_state', state, cookieOptions);
   return response;
 }

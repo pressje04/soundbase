@@ -8,74 +8,44 @@ export default function SpotifyCallbackHandler() {
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
-  function fromUrlSafeBase64(str: string): string {
-    str = str.replace(/-/g, '+').replace(/_/g, '/');
-    while (str.length % 4) str += '=';
-    return atob(str);
-  }
-
   useEffect(() => {
-    async function fetchToken() {
+    async function exchangeCode() {
+      const errorFromSpotify = params.get('error');
       const code = params.get('code');
       const state = params.get('state');
-      const codeVerifier = state ? fromUrlSafeBase64(state) : null;
-      const errorFromSpotify = params.get('error'); // e.g., "access_denied"
 
-      console.log('🔍 Callback Loaded');
-      console.log('🎯 Redirect URI:', process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI);
-      console.log('🎟️ code:', code);
-      console.log('❓ error:', errorFromSpotify);
-      console.log('🧾 code_verifier from localStorage:', codeVerifier);
-
-      if (!code || !codeVerifier) {
-        setError("Missing code or code verifier.");
+      if (errorFromSpotify) {
+        setError(`Spotify authorization was denied: ${errorFromSpotify}`);
+        return;
+      }
+      if (!code || !state) {
+        setError('Spotify did not return a valid authorization response.');
         return;
       }
 
-      const body = new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI!,
-        client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!,
-        code_verifier: codeVerifier,
-      });
-
       try {
-        const res = await fetch('https://accounts.spotify.com/api/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: body.toString(),
-        });
+        const res = await fetch(
+          `/api/spotify/callback?${new URLSearchParams({ code, state })}`,
+          { cache: 'no-store' }
+        );
+        const data = await res.json();
 
-        const text = await res.text();
-        console.log('📦 Token response raw:', text);
-
-        if (!res.ok) {
-          setError('Spotify login failed. See console for details.');
+        if (!res.ok || !data.accessToken) {
+          setError(data.error ?? 'Spotify login failed.');
           return;
         }
 
-        const data = JSON.parse(text);
-        localStorage.setItem('spotifyAccessToken', data.access_token);
-        if (data.refresh_token) {
-          localStorage.setItem('spotifyRefreshToken', data.refresh_token);
-        }
-
-        router.push('/');
-      } catch (err) {
-        console.error('❌ Unexpected error during token fetch:', err);
-        setError('An unexpected error occurred.');
+        localStorage.setItem('spotifyAccessToken', data.accessToken);
+        if (data.refreshToken) localStorage.setItem('spotifyRefreshToken', data.refreshToken);
+        router.replace('/');
+      } catch (error) {
+        console.error('Spotify login failed:', error);
+        setError('Spotify login failed. Please try again.');
       }
     }
 
-    fetchToken();
+    exchangeCode();
   }, [params, router]);
 
-  return (
-    <div className="text-white p-8">
-      {error ? `⚠️ ${error}` : 'Logging you in with Spotify...'}
-    </div>
-  );
+  return <div className="text-white p-8">{error ? `⚠️ ${error}` : 'Logging you in with Spotify...'}</div>;
 }

@@ -7,54 +7,81 @@ import useUser from '@/hooks/useUser';
 import Link from 'next/link';
 import SuggestedUserScroll from '@/components/SuggestedUserScroll';
 
+type CarouselAlbumResponse = {
+  albumId?: string;
+  albumName?: string;
+  imageUrl?: string;
+  id?: string;
+  name?: string;
+  images?: { url?: string }[];
+};
+
+function formatCarouselAlbums(data: unknown) {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data.flatMap((album: CarouselAlbumResponse) => {
+    const id = album.albumId ?? album.id;
+    const name = album.albumName ?? album.name;
+    const imageUrl = album.imageUrl ?? album.images?.[0]?.url;
+
+    return id && name && imageUrl ? [{ id, name, images: [{ url: imageUrl }] }] : [];
+  });
+}
+
 export default function Page() {
-  const [albums, setAlbums] = useState([]) //React state for setting albums and displaying them
   const [topAlbums, setTopAlbums] = useState<any[]>([]);
   const [recentAlbums, setRecentAlbums] = useState<any[]>([]);
 
   const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
   const {user, loading} = useUser(); // Custom hook to see if user is logged in
 
-  useEffect(() => {
-    async function fetchAlbums() {
-      try {
-        const albumRes = await fetch("/api/albums");
-        const albums = await albumRes.json();
-        setAlbums(albums);
-      } catch (error) {
-        console.error("Failed to get albums:", error);
-      }
+  async function fetchFallbackAlbums() {
+    const res = await fetch('/api/albums');
+    const data = await res.json();
+
+    if (!res.ok || !Array.isArray(data)) {
+      throw new Error('Spotify fallback albums are unavailable');
     }
-  
-    fetchAlbums();
-  }, []);
+
+    return formatCarouselAlbums(data);
+  }
 
   useEffect(() => {
     async function fetchTopAlbums() {
-      const res = await fetch('/api/albums/top10');
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/albums/top10');
+        const data = await res.json();
 
-      const formattedData = data.map((album: any) => ({
-        id: album.albumId,
-        name: album.albumName,
-        images: [{url: album.imageUrl}],
-      }))
-      setTopAlbums(formattedData);
+        if (res.ok && Array.isArray(data)) {
+          setTopAlbums(formatCarouselAlbums(data));
+          return;
+        }
+
+        setTopAlbums(await fetchFallbackAlbums());
+      } catch (error) {
+        console.error('Unable to load top albums or Spotify fallback:', error);
+      }
     }
     fetchTopAlbums();
   }, []);
 
   useEffect(() => {
     async function fetchMostRecent() {
-      const res = await fetch(`/api/albums/mostrecent`);
-      const data = await res.json();
+      try {
+        const res = await fetch('/api/albums/mostrecent');
+        const data = await res.json();
 
-      const formattedData = data.map((album: any) => ({
-        id: album.albumId,
-        name: album.albumName,
-        images: [{url: album.imageUrl}],
-      }))
-      setRecentAlbums(formattedData);
+        if (res.ok && Array.isArray(data)) {
+          setRecentAlbums(formatCarouselAlbums(data));
+          return;
+        }
+
+        setRecentAlbums(await fetchFallbackAlbums());
+      } catch (error) {
+        console.error('Unable to load recently reviewed albums or Spotify fallback:', error);
+      }
     }
     fetchMostRecent();
   }, []);
