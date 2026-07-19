@@ -45,6 +45,7 @@ async function refreshSpotifyToken(): Promise<string | null> {
 export default function MusicPlayerBar() {
   const setDeviceId = useSpotifyPlayerStore((state) => state.setDeviceId);
   const setIsConnected = useSpotifyPlayerStore((state) => state.setIsConnected);
+  const setActivatePlayer = useSpotifyPlayerStore((state) => state.setActivatePlayer);
 
   const [shouldRender, setShouldRender] = useState(false);
   const [playerInstance, setPlayerInstance] = useState<any>(null);
@@ -87,6 +88,7 @@ export default function MusicPlayerBar() {
         console.log('Spotify player ready:', device_id);
         setDeviceId(device_id);
         setIsConnected(true);
+        setActivatePlayer(() => player.activateElement());
         setPlayerInstance(player);
         setShouldRender(true);
       });
@@ -104,6 +106,7 @@ export default function MusicPlayerBar() {
       player.addListener('not_ready', () => {
         setDeviceId(null);
         setIsConnected(false);
+        setActivatePlayer(null);
       });
 
       player.addListener('initialization_error', (e: { message: string }) => {
@@ -125,13 +128,14 @@ export default function MusicPlayerBar() {
 
       player.connect();
     };
-  }, [setDeviceId, setIsConnected]);
+  }, [setActivatePlayer, setDeviceId, setIsConnected]);
 
   const runPlayerCommand = async (command: () => Promise<void>) => {
     if (!playerInstance || isControlling) return;
 
     setIsControlling(true);
     try {
+      await playerInstance.activateElement();
       await command();
     } catch (error) {
       console.error('Spotify player control failed:', error);

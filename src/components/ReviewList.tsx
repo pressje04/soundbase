@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ScorePill from './ScorePill';
-import Image from 'next/image';
+import UserAvatar from './UserAvatar';
 
 export default function PostList({ albumId }: { albumId: string }) {
   const [posts, setPosts] = useState<any[]>([]);
@@ -32,19 +32,7 @@ export default function PostList({ albumId }: { albumId: string }) {
           <div className="flex items-start gap-4">
             {/* Profile Image */}
             <div className="shrink-0">
-              {post.user?.image ? (
-                <Image
-                  src={post.user.image}
-                  alt="Profile"
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover w-12 h-12"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-                  {post.user?.firstName?.charAt(0) ?? 'A'}
-                </div>
-              )}
+              <UserAvatar src={post.user?.image} name={post.user?.firstName} />
             </div>
 
             {/* Content */}

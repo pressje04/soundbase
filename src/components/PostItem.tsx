@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import ScorePill from './ScorePill';
-import Image from 'next/image';
 import useUser from '@/hooks/useUser';
 import Link from 'next/link';
 import ReviewForm from './ReviewForm';
 import { Pencil, Heart, Repeat2, MessageCircle, Eye, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import UserAvatar from './UserAvatar';
 
 export default function PostItem({
   post,
@@ -123,19 +123,7 @@ export default function PostItem({
 
     <div className="flex items-start gap-4">
       <Link href={`/profile/${post.user?.id}`} className="shrink-0">
-        {post.user?.image ? (
-          <Image
-            src={post.user.image}
-            alt="Profile"
-            width={48}
-            height={48}
-            className="rounded-full object-cover w-12 h-12"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-            {post.user?.firstName?.charAt(0) ?? 'A'}
-          </div>
-        )}
+        <UserAvatar src={post.user?.image} name={post.user?.firstName} />
       </Link>
 
       <div className="flex-1 min-w-0">

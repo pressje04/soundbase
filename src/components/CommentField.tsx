@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import useUser from '@/hooks/useUser';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import UserAvatar from './UserAvatar';
 
 type Props = {
   albumId: string;
@@ -67,19 +67,7 @@ export default function CommentComposer({
     <div className="flex items-start gap-4 mt-6">
       {/* Profile or Placeholder */}
       {user ? (
-        user.image ? (
-          <Image
-            src={user.image}
-            alt="User"
-            width={40}
-            height={40}
-            className="rounded-full object-cover w-10 h-10"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-            {user.firstName?.charAt(0) ?? 'U'}
-          </div>
-        )
+        <UserAvatar src={user.image} name={user.firstName} className="w-10 h-10 text-sm" />
       ) : (
         <div
           onClick={() => router.push('/signup')}

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/navbar';
 import SearchAlbumCard from '@/components/SearchAlbumCard';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function SearchPage() {
   const [albums, setAlbums] = useState<any[]>([]);
@@ -145,19 +146,7 @@ export default function SearchPage() {
             {users.map((user) => (
               <Link key={user.id} href={`/profile/${user.id}`} className="block hover:bg-gray-800 rounded p-3 transition">
                 <div className="flex items-center space-x-4">
-                {user.image ? (
-                  <Image
-                    src={user.image}
-                    alt={user.username}
-                    width={48}
-                    height={48}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-white text-sm">
-                  {user.firstName?.charAt(0) ?? 'A'}
-                  </div>
-                )}
+                <UserAvatar src={user.image} name={user.firstName} />
 
                   <div>
                     <p className="text-white font-semibold">@{user.username}</p>

@@ -26,7 +26,7 @@ type Props = {
 export default function AlbumPageClient(props: Props) {
   const [newPost, setNewPost] = useState(null);
 
-  const { deviceId, isConnected } = useSpotifyPlayerStore();
+  const { deviceId, isConnected, activatePlayer } = useSpotifyPlayerStore();
 
   const handlePlayTrack = async (trackUri: string) => {
     const token = localStorage.getItem('spotifyAccessToken');
@@ -34,6 +34,8 @@ export default function AlbumPageClient(props: Props) {
       alert('Spotify not ready. Please wait a moment.');
       return;
     }
+
+    await activatePlayer?.();
   
     const res = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',

@@ -1,8 +1,8 @@
 'use client';
 
 import { Dialog } from '@headlessui/react';
-import { User } from 'lucide-react';
 import Link from 'next/link';
+import UserAvatar from './UserAvatar';
 
 export default function FollowModal({
   title,
@@ -29,17 +29,7 @@ export default function FollowModal({
                 key={user.id}
                 className="flex items-center gap-4 px-4 py-3 bg-zinc-800 rounded-lg hover:bg-zinc-700 transition"
               >
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={user.firstName}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                )}
+                <UserAvatar src={user.image} name={user.firstName} className="w-10 h-10 text-sm" />
                 <Link
                   href={`/profile/${user.id}`}
                   className="text-white font-medium font-semibold hover:text-blue-500 transition"

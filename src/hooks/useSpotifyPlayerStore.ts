@@ -6,6 +6,8 @@ type SpotifyPlayerState = {
   setDeviceId: (id: string | null) => void;
   isConnected: boolean;
   setIsConnected: (connected: boolean) => void;
+  activatePlayer: (() => Promise<void>) | null;
+  setActivatePlayer: (activate: (() => Promise<void>) | null) => void;
 };
 
 export const useSpotifyPlayerStore = create<SpotifyPlayerState>((set) => ({
@@ -13,4 +15,6 @@ export const useSpotifyPlayerStore = create<SpotifyPlayerState>((set) => ({
   isConnected: false,
   setDeviceId: (id) => set({ deviceId: id }),
   setIsConnected: (connected) => set({ isConnected: connected }),
+  activatePlayer: null,
+  setActivatePlayer: (activate) => set({ activatePlayer: activate }),
 }));

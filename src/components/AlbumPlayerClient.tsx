@@ -3,7 +3,7 @@
 import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
 
 export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
-  const { deviceId, isConnected } = useSpotifyPlayerStore();
+  const { deviceId, isConnected, activatePlayer } = useSpotifyPlayerStore();
 
   const handlePlay = async () => {
     const token = localStorage.getItem('spotifyAccessToken');
@@ -11,6 +11,8 @@ export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
       alert('Spotify not ready.');
       return;
     }
+
+    await activatePlayer?.();
 
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
