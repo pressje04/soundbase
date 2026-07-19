@@ -3,7 +3,7 @@ import { create } from 'zustand';
 
 type SpotifyPlayerState = {
   deviceId: string | null;
-  setDeviceId: (id: string) => void;
+  setDeviceId: (id: string | null) => void;
   isConnected: boolean;
   setIsConnected: (connected: boolean) => void;
 };

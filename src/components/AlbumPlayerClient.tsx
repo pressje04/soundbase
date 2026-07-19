@@ -1,7 +1,6 @@
 'use client';
 
 import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
-import MusicPlayerBar from './MusicPlayerBar';
 
 export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
   const { deviceId, isConnected } = useSpotifyPlayerStore();
@@ -36,7 +35,6 @@ export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
       >
         Play Album
       </button>
-      <MusicPlayerBar />
     </div>
   );
 }

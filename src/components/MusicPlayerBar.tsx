@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSpotifyPlayerStore } from '@/hooks/useSpotifyPlayerStore';
 import {Play, Pause, SkipForward, SkipBack} from 'lucide-react';
 
@@ -50,8 +50,13 @@ export default function MusicPlayerBar() {
   const [playerInstance, setPlayerInstance] = useState<any>(null);
   const [track, setTrack] = useState<any>(null);
   const [paused, setPaused] = useState(true);
+  const [isControlling, setIsControlling] = useState(false);
+  const initialized = useRef(false);
 
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
     if (window.Spotify && window.onSpotifyWebPlaybackSDKReady) {
       window.onSpotifyWebPlaybackSDKReady();
       return;
@@ -87,9 +92,18 @@ export default function MusicPlayerBar() {
       });
 
       player.addListener('player_state_changed', (state: any) => {
-        if (!state) return;
+        if (!state) {
+          setTrack(null);
+          setPaused(true);
+          return;
+        }
         setTrack(state.track_window.current_track);
         setPaused(state.paused);
+      });
+
+      player.addListener('not_ready', () => {
+        setDeviceId(null);
+        setIsConnected(false);
       });
 
       player.addListener('initialization_error', (e: { message: string }) => {
@@ -113,17 +127,24 @@ export default function MusicPlayerBar() {
     };
   }, [setDeviceId, setIsConnected]);
 
-  const handlePlayPause = () => {
-    if (playerInstance) playerInstance.togglePlay();
+  const runPlayerCommand = async (command: () => Promise<void>) => {
+    if (!playerInstance || isControlling) return;
+
+    setIsControlling(true);
+    try {
+      await command();
+    } catch (error) {
+      console.error('Spotify player control failed:', error);
+    } finally {
+      setIsControlling(false);
+    }
   };
 
-  const handleSkipNext = () => {
-    if (playerInstance) playerInstance.nextTrack();
-  };
+  const handlePlayPause = () => runPlayerCommand(() => playerInstance.togglePlay());
 
-  const handleSkipPrev = () => {
-    if (playerInstance) playerInstance.previousTrack();
-  };
+  const handleSkipNext = () => runPlayerCommand(() => playerInstance.nextTrack());
+
+  const handleSkipPrev = () => runPlayerCommand(() => playerInstance.previousTrack());
 
   if (!shouldRender) return null;
 
@@ -146,17 +167,17 @@ export default function MusicPlayerBar() {
       </div>
 
       <div className="flex items-center text-3xl gap-6">
-        <button onClick={handleSkipPrev}>
+        <button onClick={handleSkipPrev} disabled={!playerInstance || isControlling} aria-label="Previous track">
           <SkipBack className="w-6 h-6"/>
         </button>
-        <button onClick={handlePlayPause}>
+        <button onClick={handlePlayPause} disabled={!playerInstance || isControlling} aria-label={paused ? 'Play' : 'Pause'}>
           {paused ? (
             <Play className="w-6 h-6"/>
           ) : (
             <Pause className="w-6 h-6"/>
           )}
             </button>
-        <button onClick={handleSkipNext}>
+        <button onClick={handleSkipNext} disabled={!playerInstance || isControlling} aria-label="Next track">
           <SkipForward className="w-6 h-6"/>
         </button>
       </div>

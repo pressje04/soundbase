@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Script from 'next/script';
 import MusicPlayerBar from "@/components/MusicPlayerBar";
 
 const geistSans = Geist({
@@ -35,7 +34,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white min-h-screen`}
       >
         {children}
-        <Script src="https://sdk.scdn.co/spotify-player.js" strategy="afterInteractive" />
         <div className="mt-10">
           <MusicPlayerBar />
         </div>
