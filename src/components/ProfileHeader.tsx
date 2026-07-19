@@ -1,4 +1,7 @@
+'use client';
+
 import Image from "next/image";
+import { useEffect, useState } from 'react';
 
 export default function ProfileHeader({
   name,
@@ -21,16 +24,24 @@ export default function ProfileHeader({
   onAvatarClick?: () => void;
   username: string;
 }) {
+  const fallbackImage = '/images/pfp_default.png';
+  const [imageSrc, setImageSrc] = useState(image || fallbackImage);
+
+  useEffect(() => {
+    setImageSrc(image || fallbackImage);
+  }, [image]);
+
   return (
     <div className="w-full items-center flex flex-col sm:flex-row gap-6 sm:items-start mb-8">
       {/* Profile Image */}
       <div className="items-center shrink-0">
         <Image
-          src={image ?? "/images/pfp_default.png"}
+          src={imageSrc}
           alt="Avatar"
           width={96}
           height={96}
           onClick={onAvatarClick}
+          onError={() => setImageSrc(fallbackImage)}
           className="rounded-full w-24 h-24 border border-white cursor-pointer hover:opacity-80 transition"
           title={onAvatarClick ? 'Click to change avatar' : 'Profile avatar'}
         />

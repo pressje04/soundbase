@@ -39,7 +39,8 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
       const updated = await res.json();
       setProfileData((prev: any) => ({ ...prev, image: updated.image }));
     } else {
-      console.error('Failed to upload avatar');
+      const error = await res.json().catch(() => null);
+      console.error('Failed to upload avatar:', error?.error ?? res.statusText);
     }
   };
 
