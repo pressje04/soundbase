@@ -13,6 +13,7 @@ type Props = {
   albumId: string;
   albumName: string;
   artistName: string;
+  artists: { id: string; name: string }[];
   releaseYear: string;
   imageUrl: string;
   tracklist: {
@@ -53,7 +54,7 @@ export default function AlbumPageClient(props: Props) {
   
 
   const albumArtistSet = new Set(
-    props.artistName.split(',').map((a) => a.trim().toLowerCase())
+    props.artists.map((artist) => artist.name.trim().toLowerCase())
   );
 
   return (
@@ -76,9 +77,9 @@ export default function AlbumPageClient(props: Props) {
               {props.albumName}
             </h1>
             <div className="text-2xl font-bold mt-1 flex flex-wrap justify-center md:justify-start gap-2">
-              {props.artistName.split(', ').map((name, idx) => (
-                <Link key={idx} href="#" className="text-blue-500 hover:underline">
-                  {name}
+              {props.artists.map((artist) => (
+                <Link key={artist.id} href={`/artists/${artist.id}`} className="text-blue-500 hover:underline">
+                  {artist.name}
                 </Link>
               ))}
             </div>

@@ -1,5 +1,6 @@
 import Navbar from '@/components/navbar';
 import AlbumPageClient from '@/components/AlbumPageClient';
+import { upsertCatalogAlbum } from '@/lib/musicCatalog';
 
 interface Params {
   params: {id: string};
@@ -35,6 +36,7 @@ export default async function AlbumPage({ params }: Params) {
   }
 
   const album = await albumRes.json();
+  await upsertCatalogAlbum(album);
 
   const baseUrl =
   process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://soundbase.vercel.app';
@@ -62,6 +64,10 @@ export default async function AlbumPage({ params }: Params) {
     albumId: album.id,
     albumName: album.name,
     artistName: album.artists.map((a: any) => a.name).join(', '),
+    artists: album.artists.map((artist: { id: string; name: string }) => ({
+      id: artist.id,
+      name: artist.name,
+    })),
     releaseYear: album.release_date.slice(0, 4),
     imageUrl: album.images?.[0]?.url ?? '',
     tracklist: album.tracks.items,

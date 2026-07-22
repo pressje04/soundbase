@@ -16,15 +16,19 @@ export default function SearchPage() {
   const [activeTab, setActiveTab] = useState<'albums' | 'artists' | 'users'>('albums');
   const [hasSearched, setHasSearched] = useState(false); // ✅ NEW: tracks if a search has occurred
   const [lastQuery, setLastQuery] = useState(''); // ✅ NEW: remember last query for tab switching
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   // ✅ Handles search for albums/artists or users based on active tab
   const handleSearch = async (query: string, tabOverride?: 'albums' | 'artists' | 'users') => {
     const currentTab = tabOverride || activeTab;
+    const normalizedQuery = query.trim();
+    if (!normalizedQuery) return;
     setHasSearched(true);
-    setLastQuery(query);
+    setLastQuery(normalizedQuery);
+    setSearchError(null);
 
     if (currentTab === 'users') {
-      const res = await fetch(`/api/search/users?query=${query}`);
+      const res = await fetch(`/api/search/users?query=${encodeURIComponent(normalizedQuery)}`);
       const data = await res.json();
       setUsers(data || []);
       return;
@@ -33,8 +37,14 @@ export default function SearchPage() {
     const res = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
+      body: JSON.stringify({ query: normalizedQuery }),
     });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setSearchError(data.error ?? 'Search is temporarily unavailable.');
+      return;
+    }
 
     const data = await res.json();
     const rawAlbums = data.albums?.items || [];
@@ -56,10 +66,9 @@ export default function SearchPage() {
   // ✅ Handles tab switching and triggers search for new tab using last query
   const handleTabChange = (tab: 'albums' | 'artists' | 'users') => {
     setActiveTab(tab);
-    setAlbums([]);
-    setArtists([]);
-    setUsers([]);
-    if (lastQuery) {
+    // Albums and artists are returned together, so changing between these tabs
+    // should not make another Spotify request.
+    if (lastQuery && tab === 'users') {
       handleSearch(lastQuery, tab);
     }
   };
@@ -80,6 +89,8 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
+
+      {searchError && <p className="px-4 text-center text-sm text-amber-300">{searchError}</p>}
 
       {/* ✅ Tab bar appears only after a search */}
       {hasSearched && (

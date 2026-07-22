@@ -33,10 +33,51 @@ model Follows {
 }
 
 model Artist {
-  id        String         @id
-  name      String
-  createdAt DateTime       @default(now())
-  followers ArtistFollow[] @relation("ArtistToFollows")
+  id             String         @id
+  name           String
+  normalizedName String         @default("")
+  imageUrl       String?
+  genres         String[]       @default([])
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  followers      ArtistFollow[] @relation("ArtistToFollows")
+  albums         Album[]
+
+  @@index([normalizedName])
+}
+
+model Album {
+  id             String   @id
+  name           String
+  normalizedName String
+  artistId       String
+  artistName     String
+  imageUrl       String?
+  releaseDate    String?
+  explicit       Boolean  @default(false)
+  albumType      String?
+  totalTracks    Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  artist         Artist   @relation(fields: [artistId], references: [id])
+  tracks         Track[]
+
+  @@index([normalizedName])
+  @@index([artistId])
+}
+
+model Track {
+  id          String   @id
+  name        String
+  trackNumber Int?
+  durationMs  Int?
+  artistName  String?
+  albumId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  album       Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@index([albumId])
 }
 
 model ArtistFollow {

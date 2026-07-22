@@ -37,20 +37,11 @@ export default function PostItem({
       if (!post.trackRanking || !post.albumId) return;
 
       try {
-        const tokenRes = await fetch('/api/token');
-        const tokenData = await tokenRes.json();
-
-        const albumRes = await fetch(
-          `https://api.spotify.com/v1/albums/${post.albumId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokenData.access_token}`,
-            },
-          }
-        );
+        const albumRes = await fetch(`/api/albums/${post.albumId}`);
+        if (!albumRes.ok) throw new Error('Album tracks are unavailable');
 
         const albumData = await albumRes.json();
-        const allTracks = albumData.tracks.items;
+        const allTracks = albumData.tracks;
 
         const ranked = post.trackRanking
           .map((id: string) => {
@@ -59,7 +50,7 @@ export default function PostItem({
               ? {
                   id: match.id,
                   name: match.name,
-                  imageUrl: albumData.images?.[0]?.url || '',
+                  imageUrl: albumData.imageUrl || '',
                 }
               : null;
           })
