@@ -31,6 +31,7 @@ function formatCarouselAlbums(data: unknown) {
 }
 
 export default function Page() {
+  const [popularAlbums, setPopularAlbums] = useState<any[]>([]);
   const [topAlbums, setTopAlbums] = useState<any[]>([]);
   const [recentAlbums, setRecentAlbums] = useState<any[]>([]);
 
@@ -47,6 +48,24 @@ export default function Page() {
 
     return formatCarouselAlbums(data);
   }
+
+  useEffect(() => {
+    async function fetchPopularAlbums() {
+      try {
+        const res = await fetch('/api/albums/popular');
+        const data = await res.json();
+
+        if (!res.ok || !Array.isArray(data)) {
+          throw new Error('Popular albums are unavailable');
+        }
+
+        setPopularAlbums(formatCarouselAlbums(data));
+      } catch (error) {
+        console.error('Unable to load popular albums:', error);
+      }
+    }
+    fetchPopularAlbums();
+  }, []);
 
   useEffect(() => {
     async function fetchTopAlbums() {
@@ -132,6 +151,17 @@ useEffect(() => {
         Start Exploring
       </button>
       </Link>
+
+      <section className="mt-18">
+        <h3 className="text-4xl font-bold">The Sound of 2026</h3>
+        <p className="mt-2 text-base text-gray-400">
+          The year&apos;s biggest albums and essential new releases.
+        </p>
+      </section>
+      {popularAlbums.length > 0 &&
+      <div className="mt-6 w-full">
+        <AlbumScroll albums={popularAlbums}/>
+      </div>}
 
       <h3 className="mt-18 text-4xl font-bold mb-4">Top 10 Albums on Soundbase</h3>
       {/* Album Carousel */}
