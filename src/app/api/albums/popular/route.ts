@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server';
-import { getPopularAlbumsThisYear } from '@/lib/spotifyAlbums';
+import { getCachedPopularAlbumsThisYear } from '@/lib/popularAlbums';
 
+// The database cache is the source of truth. Keep this route dynamic so Next
+// does not try to contact Supabase while pre-rendering the application.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    return NextResponse.json(await getPopularAlbumsThisYear());
+    const albums = await getCachedPopularAlbumsThisYear();
+    return NextResponse.json(albums, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+      },
+    });
   } catch (error) {
     console.error('Failed to fetch popular albums this year:', error);
     return NextResponse.json({ error: 'Popular albums are unavailable' }, { status: 502 });

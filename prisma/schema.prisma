@@ -61,9 +61,24 @@ model Album {
   updatedAt      DateTime @updatedAt
   artist         Artist   @relation(fields: [artistId], references: [id])
   tracks         Track[]
+  popularEntries PopularAlbum[]
 
   @@index([normalizedName])
   @@index([artistId])
+}
+
+model PopularAlbum {
+  id        String   @id @default(cuid())
+  year      Int
+  position  Int
+  albumId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@unique([year, position])
+  @@unique([year, albumId])
+  @@index([year, updatedAt])
 }
 
 model Track {
