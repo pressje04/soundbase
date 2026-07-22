@@ -55,51 +55,36 @@ export async function getSpotifyFallbackAlbums() {
   return searchSpotifyAlbums(accessToken, `year:${new Date().getFullYear()}`);
 }
 
-const FEATURED_ALBUM_QUERIES = [
-  'album:"Don\'t Be Dumb" artist:"A$AP Rocky"',
-  'album:"OCTANE" artist:"Don Toliver"',
-  'album:"Cry Baby" artist:"Vince Staples"',
-  'artist:"Steve Lacy" year:2026',
-  'album:"ICEMAN" artist:"Drake"',
-  'album:"The Fall-Off" artist:"J. Cole"',
-  'artist:"Kehlani" year:2026',
-];
-
 export async function getPopularAlbumsThisYear() {
   const accessToken = await getSpotifyAccessToken();
   const year = String(new Date().getFullYear());
-  const results = await Promise.allSettled(
-    FEATURED_ALBUM_QUERIES.map((query) => searchSpotifyAlbums(accessToken, query, 5))
-  );
-
-  const albums = results.flatMap((result) =>
-    result.status === 'fulfilled'
-      ? result.value.filter(
-          (album) => album.release_date?.startsWith(year) && album.album_type === 'album'
-        )
-      : []
-  );
   const seen = new Set<string>();
-  const addUniqueAlbum = (album: (typeof albums)[number], collection: typeof albums) => {
+  const uniqueAlbums: Array<{
+    id: string;
+    name: string;
+    album_type?: string;
+    release_date?: string;
+    artists?: Array<{ id?: string; name?: string }>;
+  }> = [];
+  const addUniqueAlbum = (album: (typeof uniqueAlbums)[number]) => {
     const primaryArtist = album.artists?.[0]?.id ?? album.artists?.[0]?.name ?? '';
     const identity = `${album.name.toLowerCase()}::${primaryArtist.toLowerCase()}`;
 
     if (seen.has(identity)) return false;
     seen.add(identity);
-    collection.push(album);
+    uniqueAlbums.push(album);
     return true;
   };
-  const uniqueAlbums: typeof albums = [];
-  for (const album of albums) addUniqueAlbum(album, uniqueAlbums);
 
-  if (uniqueAlbums.length >= 15) return uniqueAlbums.slice(0, 15);
-
+  // Keep the first cache fill gentle on Spotify: Search permits only ten
+  // results per page, so fetch only the pages required to find fifteen albums.
+  // The previous featured-query fan-out made 7+ simultaneous Spotify requests.
   for (let offset = 0; offset < 50 && uniqueAlbums.length < 15; offset += 10) {
     const generalReleases = await searchSpotifyAlbums(accessToken, `year:${year}`, 10, offset);
 
     for (const album of generalReleases) {
-      if (album.album_type !== 'album') continue;
-      addUniqueAlbum(album, uniqueAlbums);
+      if (album.album_type !== 'album' || !album.release_date?.startsWith(year)) continue;
+      addUniqueAlbum(album);
       if (uniqueAlbums.length === 15) break;
     }
   }
