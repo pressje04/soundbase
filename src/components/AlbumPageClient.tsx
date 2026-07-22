@@ -29,24 +29,20 @@ export default function AlbumPageClient(props: Props) {
   const { deviceId, isConnected, activatePlayer } = useSpotifyPlayerStore();
 
   const handlePlayTrack = async (trackUri: string) => {
-    const token = localStorage.getItem('spotifyAccessToken');
-    if (!token || !deviceId) {
+    if (!deviceId) {
       alert('Spotify not ready. Please wait a moment.');
       return;
     }
 
     await activatePlayer?.();
   
-    const res = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      // Preserve the album queue so the player can move to adjacent tracks.
+    const res = await fetch('/api/spotify/play', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        context_uri: `spotify:album:${props.albumId}`,
-        offset: { uri: trackUri },
+        deviceId,
+        albumId: props.albumId,
+        trackUri,
       }),
     });
 

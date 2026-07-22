@@ -12,21 +12,8 @@ declare global {
 }
 
 async function refreshSpotifyToken(): Promise<string | null> {
-  const refreshToken = localStorage.getItem('spotifyRefreshToken');
-  if (!refreshToken) return null;
-
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID!,
-  });
-
   try {
-    const res = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
-    });
+    const res = await fetch('/api/spotify/token', { cache: 'no-store' });
 
     if (!res.ok) {
       console.error('Failed to refresh Spotify token:', await res.text());
@@ -34,12 +21,21 @@ async function refreshSpotifyToken(): Promise<string | null> {
     }
 
     const data = await res.json();
-    localStorage.setItem('spotifyAccessToken', data.access_token);
-    return data.access_token;
+    localStorage.setItem('spotifyAccessToken', data.accessToken);
+    localStorage.setItem('spotifyAccessTokenExpiresAt', String(Date.now() + (Number(data.expiresIn) || 3600) * 1000));
+    return data.accessToken;
   } catch (err) {
     console.error('Error refreshing Spotify token:', err);
     return null;
   }
+}
+
+async function getSpotifyAccessToken() {
+  const token = localStorage.getItem('spotifyAccessToken');
+  const expiresAt = Number(localStorage.getItem('spotifyAccessTokenExpiresAt'));
+
+  if (token && expiresAt > Date.now() + 60_000) return token;
+  return refreshSpotifyToken();
 }
 
 export default function MusicPlayerBar() {
@@ -58,29 +54,18 @@ export default function MusicPlayerBar() {
     if (initialized.current) return;
     initialized.current = true;
 
-    if (window.Spotify && window.onSpotifyWebPlaybackSDKReady) {
-      window.onSpotifyWebPlaybackSDKReady();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://sdk.scdn.co/spotify-player.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    window.onSpotifyWebPlaybackSDKReady = async () => {
-      let token = localStorage.getItem('spotifyAccessToken');
+    const initializePlayer = async () => {
+      const token = await getSpotifyAccessToken();
       if (!token) {
-        token = await refreshSpotifyToken();
-        if (!token) {
-          console.warn('Spotify token unavailable. Skipping player render.');
-          return; // Do not render anything
-        }
+        console.warn('Spotify token unavailable. Skipping player render.');
+        return;
       }
 
       const player = new window.Spotify.Player({
         name: 'Soundbase Player',
-        getOAuthToken: (cb: (token: string) => void) => cb(token!),
+        getOAuthToken: (cb: (token: string) => void) => {
+          void getSpotifyAccessToken().then((freshToken) => cb(freshToken ?? ''));
+        },
         volume: 0.8,
       });
 
@@ -126,8 +111,22 @@ export default function MusicPlayerBar() {
       });
       
 
-      player.connect();
+      player.connect().then((connected: boolean) => {
+        console.info('Spotify player connection result:', connected);
+      });
     };
+
+    if (window.Spotify) {
+      void initializePlayer();
+      return;
+    }
+
+    // Register the callback before appending the script so a fast cached load cannot miss it.
+    window.onSpotifyWebPlaybackSDKReady = () => void initializePlayer();
+    const script = document.createElement('script');
+    script.src = 'https://sdk.scdn.co/spotify-player.js';
+    script.async = true;
+    document.body.appendChild(script);
   }, [setActivatePlayer, setDeviceId, setIsConnected]);
 
   const runPlayerCommand = async (command: () => Promise<void>) => {

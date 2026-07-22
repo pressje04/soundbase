@@ -6,6 +6,14 @@ function clearAuthCookies(response: NextResponse) {
   response.cookies.set('spotify_auth_state', '', { path: '/', maxAge: 0 });
 }
 
+const refreshCookieOptions = {
+  path: '/',
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  maxAge: 180 * 24 * 60 * 60,
+};
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
@@ -48,11 +56,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Spotify token exchange failed' }, { status: 502 });
     }
 
-    const response = NextResponse.json({
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token,
-      expiresIn: data.expires_in,
-    });
+    const response = NextResponse.json({ accessToken: data.access_token, expiresIn: data.expires_in });
+    if (data.refresh_token) response.cookies.set('spotify_refresh_token', data.refresh_token, refreshCookieOptions);
     clearAuthCookies(response);
     return response;
   } catch (error) {

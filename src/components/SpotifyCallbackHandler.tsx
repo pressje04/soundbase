@@ -36,7 +36,11 @@ export default function SpotifyCallbackHandler() {
         }
 
         localStorage.setItem('spotifyAccessToken', data.accessToken);
-        if (data.refreshToken) localStorage.setItem('spotifyRefreshToken', data.refreshToken);
+        localStorage.setItem(
+          'spotifyAccessTokenExpiresAt',
+          String(Date.now() + (Number(data.expiresIn) || 3600) * 1000)
+        );
+        localStorage.removeItem('spotifyRefreshToken');
         router.replace('/');
       } catch (error) {
         console.error('Spotify login failed:', error);

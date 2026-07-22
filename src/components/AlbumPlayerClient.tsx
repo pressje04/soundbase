@@ -6,24 +6,23 @@ export default function AlbumPlayerClient({ albumId }: { albumId: string }) {
   const { deviceId, isConnected, activatePlayer } = useSpotifyPlayerStore();
 
   const handlePlay = async () => {
-    const token = localStorage.getItem('spotifyAccessToken');
-    if (!token || !deviceId) {
+    if (!deviceId) {
       alert('Spotify not ready.');
       return;
     }
 
     await activatePlayer?.();
 
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+    const response = await fetch('/api/spotify/play', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        context_uri: `spotify:album:${albumId}`,
+        deviceId,
+        albumId,
       }),
     });
+
+    if (!response.ok) alert('Spotify could not start playback. Please reconnect and try again.');
   };
 
   return (

@@ -162,13 +162,13 @@ useEffect(() => {
                 >
                   Explore albums <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link
+                <a
                   href="/api/spotify/login"
                   className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-6 py-3.5 font-semibold text-white transition hover:border-white/30 hover:bg-white/[0.08]"
                 >
                   <Headphones className="h-4 w-4 text-green-400" />
                   Connect Spotify
-                </Link>
+                </a>
               </div>
               <div className="mt-10 flex items-center gap-6 text-sm text-zinc-500">
                 <span>Rate albums</span>
